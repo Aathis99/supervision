@@ -1,3 +1,33 @@
+<?php
+// 1. เชื่อมต่อฐานข้อมูล
+require_once 'db_connect.php';
+ 
+// 2. ดึงข้อมูลตัวชี้วัดและคำถามทั้งหมดในครั้งเดียวด้วย JOIN
+$sql = "SELECT 
+            ind.id AS indicator_id, 
+            ind.title AS indicator_title,
+            q.id AS question_id,
+            q.question_text
+        FROM 
+            kpi_indicators ind
+        LEFT JOIN 
+            kpi_questions q ON ind.id = q.indicator_id
+        ORDER BY 
+            ind.display_order ASC, q.display_order ASC";
+ 
+$result = $conn->query($sql);
+ 
+// 3. จัดกลุ่มข้อมูลให้อยู่ในรูปแบบที่ใช้งานง่าย
+$indicators = [];
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $indicators[$row['indicator_id']]['title'] = $row['indicator_title'];
+        if ($row['question_id']) { // ตรวจสอบว่ามีคำถามหรือไม่
+            $indicators[$row['indicator_id']]['questions'][] = $row;
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="th">
   <head>
@@ -15,229 +45,73 @@
     </head>
   <body>
     <div class="container mt-5">
-      <div class="section-header mb-3">
-        <h2 class="h5">
-          ตัวชี้วัดที่ 1 ผู้เรียนสามารถ เข้าถึงสิ่งเรียนและ เข้าใจบทเรียน /
-          กิจกรรม
-        </h2>
-      </div>
+      <form id="evaluationForm" method="POST" action="save_kpi_data.php"> <!-- สมมติว่าบันทึกไปที่ไฟล์นี้ -->
+ 
+        <?php foreach ($indicators as $indicator_id => $indicator_data) : ?>
+          <div class="section-header mb-3">
+            <h2 class="h5"><?php echo htmlspecialchars($indicator_data['title']); ?></h2>
+          </div>
+ 
+          <?php if (!empty($indicator_data['questions'])) : ?>
+            <?php foreach ($indicator_data['questions'] as $question) : 
+                $question_id = $question['question_id'];
+            ?>
+            <div class="card mb-3">
+              <div class="card-body p-4">
+                <div class="mb-3">
+                  <label class="form-label-question" for="rating_<?php echo $question_id; ?>">
+                    <?php echo htmlspecialchars($question['question_text']); ?>
+                  </label>
+                </div>
+                <p>เลือกคะแนนตามความพึงพอใจของคุณ</p>
+                
+                <?php for ($i = 3; $i >= 0; $i--) : ?>
+                  <div class="form-check form-check-inline">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      name="ratings[<?php echo $question_id; ?>]"
+                      id="q<?php echo $question_id; ?>-<?php echo $i; ?>"
+                      value="<?php echo $i; ?>"
+                      required
+                    />
+                    <label class="form-check-label" for="q<?php echo $question_id; ?>-<?php echo $i; ?>"><?php echo $i; ?></label>
+                  </div>
+                <?php endfor; ?> 
 
-      <div class="card mb-3">
-        <div class="card-body p-4">
-          <form id="evaluationForm">
-            <div class="mb-3">
-              <label class="form-label-question"
-                >เนื้อหา (Content) พร้อมโน้ตทัศน์ที่จัดให้ผู้เรียนเรียนรู้
-                หรือฝึกฝน มีความถูกต้อง และ ตรงตามหลักสูตร</label
-              >
+                <hr class="my-4" />
+                <div class="mb-3">
+                  <label for="comments_<?php echo $question_id; ?>" class="form-label">ข้อค้นพบ</label>
+                  <textarea
+                    class="form-control"
+                    id="comments_<?php echo $question_id; ?>"
+                    name="comments[<?php echo $question_id; ?>]"
+                    rows="3"
+                    placeholder="กรอกความคิดเห็นของคุณที่นี่..."
+                  ></textarea>
+                </div>
+              </div>
             </div>
-            <p>เลือกคะแนนตามความพึงพอใจของคุณ</p>
-            <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="contentRating"
-                id="q1-3"
-                value="3"
-              />
-              <label class="form-check-label" for="q1-3">3</label>
+            <?php endforeach; ?>
+ 
+          <!-- ส่วนสำหรับ "ข้อเสนอแนะเพิ่มเติม" ของแต่ละตัวชี้วัด -->
+          <div class="card mb-4">
+            <div class="card-body p-4">
+              <div class="mb-3">
+                  <label for="indicator_suggestion_<?php echo $indicator_id; ?>" class="form-label fw-bold">ข้อเสนอแนะเพิ่มเติมสำหรับตัวชี้วัดนี้</label>
+                  <textarea class="form-control" id="indicator_suggestion_<?php echo $indicator_id; ?>" name="indicator_suggestions[<?php echo $indicator_id; ?>]" rows="3" placeholder="กรอกข้อเสนอแนะ..."></textarea>
+              </div>
             </div>
-            <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="contentRating"
-                id="q1-2"
-                value="2"
-              />
-              <label class="form-check-label" for="q1-2">2</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="contentRating"
-                id="q1-1"
-                value="1"
-              />
-              <label class="form-check-label" for="q1-1">1</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="contentRating"
-                id="q1-0"
-                value="0"
-              />
-              <label class="form-check-label" for="q1-0">0</label>
-            </div>
+          </div>
+          <?php endif; ?>
+        <?php endforeach; ?>
 
-            <hr class="my-4" />
-            <div class="mb-3">
-              <label for="comments" class="form-label">ข้อค้นพบ</label>
-              <textarea
-                class="form-control"
-                id="comments"
-                name="comments"
-                rows="3"
-                placeholder="กรอกความคิดเห็นของคุณที่นี่..."
-              ></textarea>
-            </div>
-          </form>
+        <div class="d-flex justify-content-center my-4">
+          <button type="submit" class="btn btn-success fs-5 btn-hover-blue px-4 py-2">
+            บันทึกข้อมูล
+          </button>
         </div>
-      </div>
-
-      <div class="card mb-3">
-        <div class="card-body p-4">
-          <form id="evaluationForm">
-            <div class="mb-3">
-              <label class="form-label-question"
-                >ออกแบบและจัดโครงสร้างบทเรียนเป็นระบบและใช้เวลาเหมาะสม</label
-              >
-            </div>
-            <p>เลือกคะแนนตามความพึงพอใจของคุณ</p>
-            <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="contentRating"
-                id="q1-3"
-                value="3"
-              />
-              <label class="form-check-label" for="q1-3">3</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="contentRating"
-                id="q1-2"
-                value="2"
-              />
-              <label class="form-check-label" for="q1-2">2</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="contentRating"
-                id="q1-1"
-                value="1"
-              />
-              <label class="form-check-label" for="q1-1">1</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="contentRating"
-                id="q1-0"
-                value="0"
-              />
-              <label class="form-check-label" for="q1-0">0</label>
-            </div>
-
-            <hr class="my-4" />
-            <div class="mb-3">
-              <label for="comments" class="form-label">ข้อค้นพบ</label>
-              <textarea
-                class="form-control"
-                id="comments"
-                name="comments"
-                rows="3"
-                placeholder="กรอกความคิดเห็นของคุณที่นี่..."
-              ></textarea>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <div class="card-body p-4">
-          <form id="evaluationForm">
-            <div class="mb-3">
-              <label class="form-label-question"
-                >ใช้สื่อประกอบบทเรียนได้เหมาะสมและช่วยในการเรียนรู้บรรลุวัตถุประสงค์ของบทเรียน</label
-              >
-            </div>
-            <p>เลือกคะแนนตามความพึงพอใจของคุณ</p>
-            <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="contentRating"
-                id="q1-3"
-                value="3"
-              />
-              <label class="form-check-label" for="q1-3">3</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="contentRating"
-                id="q1-2"
-                value="2"
-              />
-              <label class="form-check-label" for="q1-2">2</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="contentRating"
-                id="q1-1"
-                value="1"
-              />
-              <label class="form-check-label" for="q1-1">1</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="contentRating"
-                id="q1-0"
-                value="0"
-              />
-              <label class="form-check-label" for="q1-0">0</label>
-            </div>
-
-            <hr class="my-4" />
-            <div class="mb-3">
-              <label for="comments" class="form-label">ข้อค้นพบ</label>
-              <textarea
-                class="form-control"
-                id="comments"
-                name="comments"
-                rows="3"
-                placeholder="กรอกความคิดเห็นของคุณที่นี่..."
-              ></textarea>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <div class="mb-3 p-2">
-        <label for="comments" class="form-label">ข้อเสนอแนะ</label>
-        <textarea
-          class="form-control"
-          id="comments"
-          name="comments"
-          rows="3"
-          placeholder="กรอกความคิดเห็นของคุณที่นี่..."
-        ></textarea>
-      </div>
-
-      <div class="d-flex justify-content-center">
-        <button
-          type="button"
-          onclick="changeBackgroundColor('')"
-          class="btn btn-success fs-1 btn-hover-blue"
-        >
-          บันทึกข้อมูล
-        </button>
-      </div>
+      </form>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -245,27 +119,11 @@
       document.addEventListener("DOMContentLoaded", function () {
         // เลือก input 'radio' ทั้งหมดในฟอร์ม
         const allRadioButtons = document.querySelectorAll(
-          '#evaluationForm input[type="radio"]'
+          'form#evaluationForm input[type="radio"]'
         );
 
-        allRadioButtons.forEach(function (radio) {
-          radio.addEventListener("change", function () {
-            console.log(`คำถาม: ${this.name}, ค่าที่เลือก: ${this.value}`);
-          });
-        });
-
-        // (ส่วนเสริม) ดักจับการพิมพ์ใน Textarea
-        const commentsBox = document.getElementById("comments");
-        if (commentsBox) {
-          commentsBox.addEventListener("input", function () {
-            console.log(`กำลังพิมพ์ข้อเสนอแนะ: ${this.value}`);
-          });
-        }
+        // สามารถเพิ่ม JavaScript สำหรับตรวจสอบข้อมูลก่อนส่งได้ที่นี่
       });
-      // function เปลี่ยนสีปุ่ม
-      function changeBackgroundColor(color) {
-        document.body.style.backgroundColor = color; // Changes the body's background
-      }
     </script>
   </body>
 </html>
