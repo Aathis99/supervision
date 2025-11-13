@@ -1,7 +1,7 @@
 body { 
     background-color: #f4f7f6; /* เดิมจาก styles.css */
     /* ถูกแทนที่/แก้ไขด้วย #feee91 ในไฟล์ kpi_form.php แต่เราใช้ #feee91 ที่เป็นสีจาก kpi_form.php เพื่อให้เหมือนหน้าเว็บ */
-    background-color: #feee91; 
+    background-color: #ffffff; 
 }
 
 /* ใช้ card เป็น container หลักสำหรับจัดกึ่งกลาง */

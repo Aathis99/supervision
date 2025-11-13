@@ -3,7 +3,7 @@
 $servername = "localhost";
 $username = "root"; // เปลี่ยนเป็นชื่อผู้ใช้ MySQL ของคุณ
 $password = ""; // เปลี่ยนเป็นรหัสผ่าน MySQL ของคุณ
-$dbname = "supervisor"; // เปลี่ยนเป็นชื่อฐานข้อมูลที่คุณสร้าง
+$dbname = "sesa_db"; // เปลี่ยนเป็นชื่อฐานข้อมูลที่คุณสร้าง
 
 // สร้างการเชื่อมต่อ
 $conn = new mysqli($servername, $username, $password, $dbname);
