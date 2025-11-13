@@ -1,4 +1,5 @@
 <?php
+session_start(); // เริ่ม Session เพื่อเข้าถึงข้อมูลที่บันทึกไว้
 // 1. เชื่อมต่อฐานข้อมูล
 require_once 'db_connect.php';
  
@@ -47,15 +48,21 @@ if ($result) {
     <div class="container mt-5">
       <!-- แบบฟอร์มหลักที่รวมทุกอย่าง -->
       <form id="evaluationForm" method="POST" action="save_kpi_data.php">
-
-        <!-- ================================================== -->
-        <!-- ===== ส่วนของข้อมูลผู้นิเทศและผู้รับการนิเทศ ===== -->
-        <!-- ================================================== -->
-        <?php 
-            // นำเข้าส่วนเลือกผู้นิเทศและผู้รับการนิเทศ
-            require_once 'supervisor.php'; 
-            require_once 'teacher.php';
-        ?>
+        
+        <?php if (isset($_SESSION['supervision_data'])): ?>
+            <div class="alert alert-info mb-4">
+                <h5 class="alert-heading">ข้อมูลการนิเทศ</h5>
+                <p class="mb-1">
+                    <strong>ผู้นิเทศ:</strong> <?php echo htmlspecialchars($_SESSION['supervision_data']['supervisor_name'] ?? 'N/A'); ?>
+                </p>
+                <p class="mb-0">
+                    <strong>ผู้รับการนิเทศ:</strong> <?php echo htmlspecialchars($_SESSION['supervision_data']['teacher_name'] ?? 'N/A'); ?>
+                </p>
+            </div>
+        <?php else: ?>
+            <div class="alert alert-danger">ไม่พบข้อมูลการนิเทศ กรุณากลับไปเริ่มต้นที่ <a href="index.php">หน้าแรก</a></div>
+        <?php endif; ?>
+        
         <!-- ================================================== -->
         <!-- ===== ส่วนของตัวชี้วัดและคำถาม (ของเดิม) ===== -->
         <!-- ================================================== -->

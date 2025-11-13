@@ -14,9 +14,13 @@ function redirect_with_message($message, $type = 'danger') {
 // 1. ตรวจสอบว่าข้อมูลถูกส่งมาแบบ POST หรือไม่
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // 2. รับข้อมูลหลัก (ผู้นิเทศ และ ผู้รับการนิเทศ)
-    $supervisor_p_id = isset($_POST['supervisor_p_id']) ? trim($_POST['supervisor_p_id']) : '';
-    $teacher_t_pid = isset($_POST['teacher_t_pid']) ? trim($_POST['teacher_t_pid']) : '';
+    // 2. รับข้อมูลหลัก (ผู้นิเทศ และ ผู้รับการนิเทศ) จาก SESSION
+    if (!isset($_SESSION['supervision_data'])) {
+        redirect_with_message("Session หมดอายุหรือไม่พบข้อมูลการนิเทศ กรุณาเริ่มต้นใหม่");
+    }
+    $supervision_data = $_SESSION['supervision_data'];
+    $supervisor_p_id = isset($supervision_data['supervisor_p_id']) ? trim($supervision_data['supervisor_p_id']) : '';
+    $teacher_t_pid = isset($supervision_data['teacher_t_pid']) ? trim($supervision_data['teacher_t_pid']) : '';
 
     // 3. รับข้อมูลการประเมิน (คะแนน, ข้อค้นพบ, ข้อเสนอแนะ)
     $ratings = isset($_POST['ratings']) ? $_POST['ratings'] : [];
@@ -84,6 +88,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // 8. ถ้าทุกอย่างสำเร็จ ให้ Commit Transaction
         $conn->commit();
+
+        // ล้างข้อมูล session หลังจากบันทึกสำเร็จ
+        unset($_SESSION['supervision_data']);
 
         // ตั้งค่าข้อความแจ้งเตือนว่าสำเร็จ
         redirect_with_message("บันทึกข้อมูลการประเมินเรียบร้อยแล้ว", "success");
