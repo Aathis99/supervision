@@ -45,7 +45,20 @@ if ($result) {
     </head>
   <body>
     <div class="container mt-5">
-      <form id="evaluationForm" method="POST" action="save_kpi_data.php"> <!-- สมมติว่าบันทึกไปที่ไฟล์นี้ -->
+      <!-- แบบฟอร์มหลักที่รวมทุกอย่าง -->
+      <form id="evaluationForm" method="POST" action="save_kpi_data.php">
+
+        <!-- ================================================== -->
+        <!-- ===== ส่วนของข้อมูลผู้นิเทศและผู้รับการนิเทศ ===== -->
+        <!-- ================================================== -->
+        <?php 
+            // นำเข้าส่วนเลือกผู้นิเทศและผู้รับการนิเทศ
+            require_once 'supervisor.php'; 
+            require_once 'teacher.php';
+        ?>
+        <!-- ================================================== -->
+        <!-- ===== ส่วนของตัวชี้วัดและคำถาม (ของเดิม) ===== -->
+        <!-- ================================================== -->
  
         <?php foreach ($indicators as $indicator_id => $indicator_data) : ?>
           <div class="section-header mb-3">

@@ -5,12 +5,13 @@ $sql_teachers = "SELECT CONCAT(IFNULL(PrefixName,''), ' ', Fname, ' ', Lname) AS
 $result_teachers = $conn->query($sql_teachers);
 ?>
 <hr>
+<!-- ส่วนของผู้รับการนิเทศ -->
 <div class="card-body">
     <div class="row g-3">
         
         <div class="col-md-6">
             <label for="teacher_name_input" class="form-label fw-bold">ชื่อผู้รับนิเทศ</label>
-            <input list="teacher_names_list" id="teacher_name_input" name="teacher_name"
+            <input list="teacher_names_list" id="teacher_name_input" name="teacher_name" required
                 class="form-control search-field"
                 placeholder="-- พิมพ์เพื่อค้นหา --"
                 onchange="fetchTeacherData(this.value)"> 
@@ -28,7 +29,7 @@ $result_teachers = $conn->query($sql_teachers);
         
         <div class="col-md-6">
             <label for="t_pid" class="form-label fw-bold">เลขบัตรประจำตัวประชาชน</label>
-            <input type="text" id="t_pid" class="form-control display-field" placeholder="--" readonly>
+            <input type="text" id="t_pid" name="teacher_t_pid" class="form-control display-field" placeholder="--" readonly>
         </div>
 
         <div class="col-md-6">
@@ -77,7 +78,5 @@ function fetchTeacherData(selectedName) {
             });
     }
 }
-// หากไฟล์นี้ถูกนำเข้าในหน้าหลัก (index.php) ที่มีการเรียก window.onload อยู่แล้ว
-// คุณไม่จำเป็นต้องมี window.onload ในไฟล์นี้
 
 </script>
