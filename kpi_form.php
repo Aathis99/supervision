@@ -45,6 +45,7 @@ if ($result) {
     </head>
   <body>
     <div class="container mt-5">
+<<<<<<< HEAD
       <!-- แบบฟอร์มหลักที่รวมทุกอย่าง -->
       <form id="evaluationForm" method="POST" action="save_kpi_data.php">
 
@@ -59,6 +60,9 @@ if ($result) {
         <!-- ================================================== -->
         <!-- ===== ส่วนของตัวชี้วัดและคำถาม (ของเดิม) ===== -->
         <!-- ================================================== -->
+=======
+      <form id="evaluationForm" method="POST" action="save_kpi_data.php"> <!-- สมมติว่าบันทึกไปที่ไฟล์นี้ -->
+>>>>>>> 5916606b299b4778e9b5b29112a7115f70bd28f7
  
         <?php foreach ($indicators as $indicator_id => $indicator_data) : ?>
           <div class="section-header mb-3">
