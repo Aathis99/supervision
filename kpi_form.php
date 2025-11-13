@@ -16,7 +16,7 @@ $sql = "SELECT
             ind.display_order ASC, q.display_order ASC";
  
 $result = $conn->query($sql);
- 
+// test
 // 3. จัดกลุ่มข้อมูลให้อยู่ในรูปแบบที่ใช้งานง่าย
 $indicators = [];
 if ($result) {
