@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (isset($_POST['evaluation_type'])) {
 
             // 2. บันทึกข้อมูลทั้งหมดลงใน Session ก่อน Redirect
-            $_SESSION['inspection_data'] = $_POST;
+            $_SESSION['supervision_data'] = $_POST;
 
             $selected_form = $_POST['evaluation_type'];
             $target_page = '';
@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     else if (isset($_POST['teacher_name']) && !isset($_POST['subject_code']) && !isset($_POST['evaluation_type'])) {
 
         // บันทึกข้อมูลบุคลากรทั้งหมดลงใน Session
-        $_SESSION['inspection_data'] = $_POST;
+        $_SESSION['supervision_data'] = $_POST;
 
         // PRG Redirect: เคลียร์ประวัติ POST (1) เพื่อให้ย้อนกลับได้
         header("Location: summary.php");
@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // ----------------------------------------------------------------
 // B) โหลดข้อมูลสำหรับแสดงผล (จาก Session)
 // ----------------------------------------------------------------
-$inspection_data = $_SESSION['inspection_data'] ?? null;
+$inspection_data = $_SESSION['supervision_data'] ?? null;
 $error_message = '';
 
 if (!$inspection_data) {

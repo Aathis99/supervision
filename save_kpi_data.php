@@ -20,8 +20,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $s_data = $_SESSION['supervision_data'];
 
     // รับข้อมูลพื้นฐาน
-    $supervisor_p_id = $s_data['supervisor_p_id'] ?? '';
-    $teacher_t_pid   = $s_data['teacher_t_pid'] ?? '';
+    $supervisor_p_id = $s_data['s_p_id'] ?? '';  // แก้จาก supervisor_p_id เป็น s_p_id
+    $teacher_t_pid   = $s_data['t_pid'] ?? '';
 
     // รับข้อมูลเพิ่มเติมที่ต้องการบันทึก (ต้องตรงกับ name ใน summary.php)
     $subject_code    = $s_data['subject_code'] ?? '';
