@@ -3,7 +3,7 @@
 require_once 'db_connect.php'; 
 
 // ⭐️ เพิ่มแท็ก FORM ครอบทุกส่วน ⭐️
-echo '<form method="POST" action="summary.php">'; 
+echo '<form method="POST" action="summary.php" onsubmit="return validateSelection()">'; 
 
 // 2. ส่วนเลือกข้อมูลผู้นิเทศ (ต้องไม่มีแท็ก <form> ในไฟล์นี้แล้ว)
 require_once 'supervisor.php'; 
