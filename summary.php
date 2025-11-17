@@ -8,44 +8,51 @@ session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // ตรวจสอบว่าเป็นการ submit ครั้งสุดท้ายจากหน้านี้ (ดูจากปุ่ม 'submit_all_data')
+    // ⭐️ LOGIC สำหรับการ Submit ครั้งที่สอง (จากฟอร์มในหน้านี้) ⭐️
     if (isset($_POST['submit_all_data'])) {
+        
+        // บันทึกข้อมูลที่กรอกใหม่ (subject_code, date, time) ลงใน Session
+        // รวมข้อมูลใหม่เข้ากับข้อมูลเดิมที่อยู่ใน Session (เช่น supervisor_name, teacher_name)
+        // รวมถึง evaluation_type ที่ส่งกลับมาใน Hidden Field
+        $_SESSION['inspection_data'] = array_merge($_SESSION['inspection_data'] ?? [], $_POST);
 
-        // 1. ตรวจสอบว่าเลือกแบบฟอร์มแล้ว
-        if (isset($_POST['evaluation_type'])) {
+        $selected_form = $_SESSION['inspection_data']['evaluation_type'] ?? '';
+        $target_page = '';
 
-            // 2. บันทึกข้อมูลทั้งหมดลงใน Session ก่อน Redirect
-            $_SESSION['inspection_data'] = $_POST;
-
-            $selected_form = $_POST['evaluation_type'];
-            $target_page = '';
-
-            if ($selected_form === 'kpi_form') {
-                $target_page = 'kpi_form.php';
-            } elseif ($selected_form === 'form_2') {
-                $target_page = 'form_2.php';
-            }
-
-            // Redirect ไปหน้าฟอร์มประเมินที่เลือกไว้
-            if ($target_page !== '') {
-                header("Location: " . $target_page);
-                exit();
-            }
+        // กำหนดหน้าเป้าหมายตามค่าที่ดึงมาจาก Session
+        if ($selected_form === 'kpi_form') {
+            $target_page = 'kpi_form.php';
+        } elseif ($selected_form === 'policy_form') {
+            $target_page = 'form_2.php';
         }
-        // ถ้าไม่มีการเลือก evaluation_type (ไม่ควรเกิดขึ้นถ้าใช้ required ใน form_selector.php)
-        // สามารถปล่อยให้ฟอร์มแสดงข้อผิดพลาดตามปกติ
-    }
+        
+        // Redirect ไปหน้าฟอร์มประเมินที่เลือกไว้
+        if ($target_page !== '') {
+            header("Location: " . $target_page);
+            exit();
+        }
 
-    // ⭐️ โค้ดสำหรับรับข้อมูลบุคลากรจาก index.php (Initial POST) ⭐️
-    // ตรวจสอบจาก field ที่มีเฉพาะใน index.php (เช่น 'teacher_name' มีอยู่, ไม่มี 'subject_code' หรือ 'evaluation_type')
-    else if (isset($_POST['teacher_name']) && !isset($_POST['subject_code']) && !isset($_POST['evaluation_type'])) {
+    } 
+    // ⭐️ LOGIC สำหรับการ Submit ครั้งแรก (จากหน้า index.php) ⭐️
+    elseif (isset($_POST['evaluation_type'])) {
 
-        // บันทึกข้อมูลบุคลากรทั้งหมดลงใน Session
+        // 1. บันทึกข้อมูลทั้งหมดลงใน Session (รวมถึง 'evaluation_type' ที่เลือกมา)
         $_SESSION['inspection_data'] = $_POST;
 
-        // PRG Redirect: เคลียร์ประวัติ POST (1) เพื่อให้ย้อนกลับได้
-        header("Location: summary.php");
-        exit();
+        $selected_form = $_POST['evaluation_type'];
+        $target_page = '';
+
+        // หากเลือกตัวเลือกที่สอง ('policy_form') ให้ทำการ Redirect ทันที
+        if ($selected_form === 'policy_form') {
+            $target_page = 'form_2.php';
+        }
+
+        // Redirect ไปหน้าฟอร์มประเมินที่เลือกไว้ทันที (หากมีการกำหนด)
+        if ($target_page !== '') {
+            header("Location: " . $target_page);
+            exit();
+        }
+        // หากเป็น 'kpi_form' จะไม่ Redirect และไปแสดง HTML ของหน้านี้ต่อ
     }
 }
 
@@ -65,7 +72,7 @@ $subject_code = htmlspecialchars($inspection_data['subject_code'] ?? '');
 $subject_name = htmlspecialchars($inspection_data['subject_name'] ?? '');
 $inspection_time = htmlspecialchars($inspection_data['inspection_time'] ?? '');
 $inspection_date = htmlspecialchars($inspection_data['inspection_date'] ?? '');
-$evaluation_type = htmlspecialchars($inspection_data['evaluation_type'] ?? ''); // สำหรับตรวจสอบ radio button
+$evaluation_type = htmlspecialchars($inspection_data['evaluation_type'] ?? ''); // สำหรับส่งใน Hidden Field
 
 ?>
 <!DOCTYPE html>
@@ -183,14 +190,9 @@ $evaluation_type = htmlspecialchars($inspection_data['evaluation_type'] ?? ''); 
                     </div>
 
                     <hr class="my-4">
+                    
+                    <input type="hidden" name="evaluation_type" value="<?php echo $evaluation_type; ?>">
 
-                    <?php
-                    // include form_selector.php ซึ่งตอนนี้เป็นแค่ HTML Fragment ของ Radio Button
-                    require_once 'form_selector.php';
-
-                    // เนื่องจากเราต้องตั้งค่า 'checked' ในกรณีที่ผู้ใช้ย้อนกลับมา
-                    // เราจะใช้ JavaScript ในการทำแทนการแก้ form_selector.php ซ้ำ
-                    ?>
                     <div class="row g-2 mt-0 justify-content-center">
                         <div class="col-auto">
                             <button type="submit" name="submit_all_data" class="btn btn-success btn-lg">
@@ -209,17 +211,10 @@ $evaluation_type = htmlspecialchars($inspection_data['evaluation_type'] ?? ''); 
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const selectedForm = '<?php echo $evaluation_type; ?>';
-            if (selectedForm) {
-                // ถ้ามีค่าอยู่ใน Session/PHP ให้ตั้งค่า checked
-                const radio = document.querySelector(`input[name="evaluation_type"][value="${selectedForm}"]`);
-                if (radio) {
-                    radio.checked = true;
-                }
-            }
+            // ลบ logic สำหรับ radio button ออก เนื่องจากไม่มีตัวเลือกแล้ว
         });
 
-        // ⭐️ JavaScript Function สำหรับตรวจสอบฟอร์ม (เผื่อกรณี required ไม่ทำงานตามที่คาดหวัง) ⭐️
+        // ⭐️ JavaScript Function สำหรับตรวจสอบฟอร์ม ⭐️
         function validateForm() {
             const subjectCode = document.getElementById('subject_code').value;
             const subjectName = document.getElementById('subject_name').value;
@@ -232,20 +227,7 @@ $evaluation_type = htmlspecialchars($inspection_data['evaluation_type'] ?? ''); 
                 return false;
             }
 
-            // ตรวจสอบว่าได้เลือกแบบฟอร์มหรือไม่
-            const radioButtons = document.getElementsByName('evaluation_type');
-            let formSelected = false;
-            for (let i = 0; i < radioButtons.length; i++) {
-                if (radioButtons[i].checked) {
-                    formSelected = true;
-                    break;
-                }
-            }
-
-            if (!formSelected) {
-                alert('กรุณาเลือกแบบฟอร์มประเมินก่อนดำเนินการต่อ');
-                return false;
-            }
+            // ลบ logic ตรวจสอบ radio button ออก เนื่องจากไม่มีตัวเลือกแล้ว
 
             return true; // ส่งฟอร์ม
         }

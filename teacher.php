@@ -49,6 +49,11 @@ $result_teachers = $conn->query($sql_teachers);
             <label for="learning_group" class="form-label fw-bold">กลุ่มสาระการเรียนรู้</label>
             <input type="text" id="learning_group" name="learning_group" class="form-control display-field" placeholder="--" readonly>
         </div>
+
+        <div class="col-md-6">
+            <label for="learning_group" class="form-label fw-bold">โรงเรียน</label>
+            <input type="text" id="learning_group" name="learning_group" class="form-control display-field" placeholder="--" readonly>
+        </div>
     </div>
 
     <div class="card-body">
@@ -57,6 +62,9 @@ $result_teachers = $conn->query($sql_teachers);
         </div>
 
         <div class="row g-3 mt-4 justify-content-center">
+            <div class="mt-4 mb-4">
+                <?php require_once 'form_selector.php'; ?>
+            </div>
             <div class="col-auto">
                 <button type="submit" class="btn btn-success btn-lg">
                     ดำเนินการต่อ
@@ -96,4 +104,26 @@ $result_teachers = $conn->query($sql_teachers);
                     });
             }
         }
+
+        function validateSelection() {
+            const supervisorName = document.getElementById('supervisor_name').value.trim();
+            const teacherName = document.getElementById('teacher_name_input').value.trim();
+
+            if (supervisorName === '' || teacherName === '') {
+                alert('โปรดเลือกข้อมูลผู้นิเทศและผู้รับนิเทศให้ครบถ้วนก่อนดำเนินการต่อ');
+                return false; // หยุดการส่งฟอร์ม
+            }
+
+            // หากมีการเลือกแบบฟอร์มแล้ว (จากโค้ดที่คุณย้ายมา) ให้ตรวจสอบต่อ
+            // หากต้องการให้บังคับเลือกแบบฟอร์ม   ด้วย ให้เพิ่ม Logic ตรงนี้
+            // เช่น:
+            // const formSelected = document.querySelector('input[name="evaluation_type"]:checked');
+            // if (!formSelected) {
+            //     alert('โปรดเลือกแบบฟอร์มประเมินก่อนดำเนินการต่อ');
+            //     return false;
+            // }
+
+            return true; // อนุญาตให้ส่งฟอร์ม
+        }
+        // ⭐️ สิ้นสุดฟังก์ชัน validateSelection() ⭐️
     </script>
