@@ -1,7 +1,6 @@
 body { 
-    background-color: #f4f7f6; /* เดิมจาก styles.css */
-    /* ถูกแทนที่/แก้ไขด้วย #feee91 ในไฟล์ kpi_form.php แต่เราใช้ #feee91 ที่เป็นสีจาก kpi_form.php เพื่อให้เหมือนหน้าเว็บ */
-    background-color: #ffffff; 
+    /* ลบ background-color ออก เพื่อให้แต่ละหน้ากำหนดสีของตัวเองได้ */
+    /* background-color: #f4f7f6; */
 }
 
 /* ใช้ card เป็น container หลักสำหรับจัดกึ่งกลาง */
@@ -10,6 +9,7 @@ body {
     margin: 40px auto; /* จัดกึ่งกลางในแนวนอนและเว้นระยะขอบบน-ล่าง */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
     border: none; /* ลบขอบ card ดั้งเดิม */
+    background-color: #ffffff; /* ⭐️ ย้ายสีพื้นหลังสีเหลืองมาไว้ที่นี่สำหรับหน้าฟอร์ม */
 }
 
 .form-header { 
@@ -46,24 +46,25 @@ body {
 /* โค้ดที่ดึงมาจาก <style> ใน kpi_form.php เริ่มต้นที่นี่ */
 /* ****************************************************** */
 
-.container {
+/* ⭐️ FIX: จำกัด scope ของ .container และ .card ให้อยู่ใน .main-card เท่านั้น */
+.main-card .container {
     max-width: 720px;
 }
 
-.card {
+.main-card .card {
     border-radius: 8px;
     border: 1px solid #dadce0;
     box-shadow: none;
 }
 
-.section-header {
+.main-card .section-header {
     background-color: #ffffff;
     border-top: 10px solid #3a8fb7;
     border-radius: 8px;
     padding: 20px;
 }
 
-.form-label-question {
+.main-card .form-label-question {
     font-weight: 500;
     color: #202124;
     font-size: 1.1rem;
@@ -83,4 +84,60 @@ body {
 .btn-hover-blue {
     transition: background-color 0.2s ease-in-out,
       border-color 0.2s ease-in-out;
+}
+
+/* --- โค้ดสำหรับหน้ารายงาน (supervision_report.php) --- */
+
+.report-container {
+    max-width: 900px;
+    margin: 30px auto;
+    background: #fff;
+    padding: 40px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.header-title {
+    color: #0d6efd;
+    border-bottom: 2px solid #0d6efd;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.info-box {
+    background-color: #eef6ff;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #cce5ff;
+}
+
+.table-kpi th {
+    background-color: #f8f9fa;
+}
+
+.score-badge {
+    font-size: 0.9rem;
+    padding: 5px 10px;
+    border-radius: 20px;
+}
+
+.badge-4 { background-color: #198754; color: white; } /* ดีมาก */
+.badge-3 { background-color: #0d6efd; color: white; } /* ดี */
+.badge-2 { background-color: #ffc107; color: black; } /* พอใช้ */
+.badge-1 { background-color: #dc3545; color: white; } /* ปรับปรุง */
+
+/* สไตล์สำหรับตอนสั่งพิมพ์ */
+@media print {
+    .no-print {
+        display: none;
+    }
+
+    .report-container {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+        max-width: 100%;
+        border: none;
+    }
 }

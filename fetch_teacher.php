@@ -14,19 +14,22 @@ if (isset($_GET['full_name'])) {
     
     // ⭐️ FIX SQL: ค้นหาจากชื่อเต็มที่ถูก CONCAT() ในฐานข้อมูล
     // ตรวจสอบให้แน่ใจว่าการ CONCAT นี้ตรงกับที่คุณใช้สร้าง Datalist ใน teacher.php
-    $sql = "SELECT t_pid, adm_name, learning_group FROM teacher 
-            WHERE CONCAT(IFNULL(PrefixName, ''), ' ', Fname, ' ', Lname) = '$full_name_search'";
+    $sql = "SELECT t.t_pid, t.adm_name, t.learning_group, s.SchoolName
+            FROM teacher t
+            LEFT JOIN school s ON t.school_id = s.school_id
+            WHERE CONCAT(IFNULL(t.PrefixName, ''), ' ', t.Fname, ' ', t.Lname) = '$full_name_search'";
             
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         
-        // ส่งคีย์ที่ตรงกับ ID ใน teacher.php (t_pid, adm_name, learning_group)
+        // ส่งคีย์ที่ตรงกับ ID ใน teacher.php (t_pid, adm_name, learning_group, และ school_name ที่เพิ่มเข้ามา)
         echo json_encode(['success' => true, 'data' => [
             't_pid' => $row['t_pid'], // คีย์สำหรับเลขบัตรประชาชน
             'adm_name' => $row['adm_name'], 
-            'learning_group' => $row['learning_group']
+            'learning_group' => $row['learning_group'],
+            'school_name' => $row['SchoolName']
         ]]);
         
     } else {
