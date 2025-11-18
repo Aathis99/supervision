@@ -267,12 +267,24 @@ while ($row = $result_sugg->fetch_assoc()) {
                     <tfoot>
                         <tr class="table-dark">
                             <td class="text-end"><strong>คะแนนรวมทั้งหมด</strong></td>
-                            <td class="text-center fw-bold"><?php echo $total_score; ?> / <?php echo $count_questions * 4; ?></td>
+                            <td class="text-center fw-bold"><?php echo $total_score; ?> / <?php echo $count_questions * 3; ?></td>
                             <td></td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
+
+            <!-- ส่วนแสดงข้อเสนอแนะภาพรวม (เพิ่มใหม่) -->
+            <?php if (!empty($info['overall_suggestion'])): ?>
+            <div class="card mt-4 border-info">
+                <div class="card-header bg-info text-dark fw-bold">
+                    <i class="fas fa-lightbulb"></i> ข้อเสนอแนะเพิ่มเติม
+                </div>
+                <div class="card-body">
+                    <p class="card-text"><?php echo nl2br(htmlspecialchars($info['overall_suggestion'])); ?></p>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <div class="text-center mt-5 no-print">
                 <button onclick="window.print()" class="btn btn-secondary me-2"><i class="fas fa-print"></i> พิมพ์รายงาน</button>

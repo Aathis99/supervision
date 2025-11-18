@@ -13,11 +13,11 @@ function redirect_with_message($message, $type = 'danger')
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    if (!isset($_SESSION['supervision_data'])) {
+    if (!isset($_SESSION['inspection_data'])) {
         redirect_with_message("Session หมดอายุหรือไม่พบข้อมูลการนิเทศ กรุณาเริ่มต้นใหม่");
     }
 
-    $s_data = $_SESSION['supervision_data'];
+    $s_data = $_SESSION['inspection_data'];
 
     // รับข้อมูลพื้นฐาน
     $supervisor_p_id = $s_data['s_p_id'] ?? '';  // แก้จาก supervisor_p_id เป็น s_p_id
@@ -32,6 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $ratings = $_POST['ratings'] ?? [];
     $comments = $_POST['comments'] ?? [];
     $indicator_suggestions = $_POST['indicator_suggestions'] ?? [];
+    $overall_suggestion = trim($_POST['overall_suggestion'] ?? ''); // ⭐️ รับข้อมูลข้อเสนอแนะภาพรวม
 
     if (empty($supervisor_p_id) || empty($teacher_t_pid)) {
         redirect_with_message("ข้อมูลไม่ครบถ้วน");
@@ -46,18 +47,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         // 1. บันทึกข้อมูล Session ลงในตาราง supervision_sessions พร้อมฟิลด์ใหม่
         $sql_session = "INSERT INTO supervision_sessions 
-                        (supervisor_p_id, teacher_t_pid, subject_code, subject_name, inspection_time, inspection_date) 
-                        VALUES (?, ?, ?, ?, ?, ?)";
+                        (supervisor_p_id, teacher_t_pid, subject_code, subject_name, inspection_time, inspection_date, overall_suggestion) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         $stmt_session = $conn->prepare($sql_session);
         $stmt_session->bind_param(
-            "ssssis",
+            "ssssiss",
             $supervisor_p_id,
             $teacher_t_pid,
             $subject_code,
             $subject_name,
             $inspection_time,
-            $inspection_date
+            $inspection_date,
+            $overall_suggestion // ⭐️ เพิ่มตัวแปรสำหรับ bind
         );
         $stmt_session->execute();
         $session_id = $conn->insert_id;
@@ -87,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt_suggestion->close();
 
         $conn->commit();
-        unset($_SESSION['supervision_data']);
+        unset($_SESSION['inspection_data']);
 
         // ส่งไปยังหน้ารายงานผล (สร้างใหม่ในขั้นตอนที่ 3)
         header("Location: supervision_report.php?session_id=" . $session_id);

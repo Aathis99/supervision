@@ -50,14 +50,14 @@ if ($result) {
     <!-- แบบฟอร์มหลักที่รวมทุกอย่าง -->
     <form id="evaluationForm" method="POST" action="save_kpi_data.php">
 
-      <?php if (isset($_SESSION['supervision_data'])): ?>
+      <?php if (isset($_SESSION['inspection_data'])): ?>
         <div class="alert alert-info mb-4">
           <h5 class="alert-heading">ข้อมูลการนิเทศ</h5>
           <p class="mb-1">
-            <strong>ผู้นิเทศ:</strong> <?php echo htmlspecialchars($_SESSION['supervision_data']['supervisor_name'] ?? 'N/A'); ?>
+            <strong>ผู้นิเทศ:</strong> <?php echo htmlspecialchars($_SESSION['inspection_data']['supervisor_name'] ?? 'N/A'); ?>
           </p>
           <p class="mb-0">
-            <strong>ผู้รับการนิเทศ:</strong> <?php echo htmlspecialchars($_SESSION['supervision_data']['teacher_name'] ?? 'N/A'); ?>
+            <strong>ผู้รับการนิเทศ:</strong> <?php echo htmlspecialchars($_SESSION['inspection_data']['teacher_name'] ?? 'N/A'); ?>
           </p>
         </div>
         <!-- <div class="alert alert-danger">ไม่พบข้อมูลการนิเทศ กรุณากลับไปเริ่มต้นที่ <a href="index.php">หน้าแรก</a></div> -->
@@ -74,7 +74,7 @@ if ($result) {
 
 
 
-          
+
         </div>
 
         <?php if (!empty($indicator_data['questions'])) : ?>
@@ -98,8 +98,8 @@ if ($result) {
                       name="ratings[<?php echo $question_id; ?>]"
                       id="q<?php echo $question_id; ?>-<?php echo $i; ?>"
                       value="<?php echo $i; ?>"
-                      required />
-                    <label class="form-check-label" for="q<?php echo $question_id; ?>-<?php echo $i; ?>"><?php echo $i; ?></label>
+                      required
+                      <?php echo ($i == 3) ? 'checked' : ''; ?> /> <label class="form-check-label" for="q<?php echo $question_id; ?>-<?php echo $i; ?>"><?php echo $i; ?></label>
                   </div>
                 <?php endfor; ?>
 
@@ -111,7 +111,7 @@ if ($result) {
                     id="comments_<?php echo $question_id; ?>"
                     name="comments[<?php echo $question_id; ?>]"
                     rows="3"
-                    placeholder="กรอกความคิดเห็นของคุณที่นี่..."></textarea>
+                    placeholder="กรอกความคิดเห็นของคุณที่นี่...">-</textarea>
                 </div>
               </div>
             </div>
@@ -121,13 +121,23 @@ if ($result) {
           <div class="card mb-4">
             <div class="card-body p-4">
               <div class="mb-3">
-                <label for="indicator_suggestion_<?php echo $indicator_id; ?>" class="form-label fw-bold">ข้อเสนอแนะเพิ่มเติมสำหรับตัวชี้วัดนี้</label>
-                <textarea class="form-control" id="indicator_suggestion_<?php echo $indicator_id; ?>" name="indicator_suggestions[<?php echo $indicator_id; ?>]" rows="3" placeholder="กรอกข้อเสนอแนะ..."></textarea>
+                <label for="indicator_suggestion_<?php echo $indicator_id; ?>" class="form-label fw-bold">ข้อเสนอแนะ</label>
+                <textarea class="form-control" id="indicator_suggestion_<?php echo $indicator_id; ?>" name="indicator_suggestions[<?php echo $indicator_id; ?>]" rows="3" placeholder="กรอกข้อเสนอแนะ...">ทดสอบข้อมูล</textarea>
               </div>
             </div>
           </div>
         <?php endif; ?>
       <?php endforeach; ?>
+
+      <!-- ================================================== -->
+      <!-- ===== ส่วนของข้อเสนอแนะภาพรวม (เพิ่มใหม่) ===== -->
+      <!-- ================================================== -->
+      <div class="card mt-4 border-primary">
+        <div class="card-header bg-primary text-white fw-bold">ข้อเสนอแนะเพิ่มเติม</div>
+        <div class="card-body">
+          <textarea class="form-control" id="overall_suggestion" name="overall_suggestion" rows="4" placeholder="กรอกข้อเสนอแนะเพิ่มเติมเกี่ยวกับการนิเทศครั้งนี้...">-</textarea>
+        </div>
+      </div>
 
       <div class="d-flex justify-content-center my-4">
         <button type="submit" class="btn btn-success fs-5 btn-hover-blue px-4 py-2">
@@ -136,6 +146,22 @@ if ($result) {
       </div>
     </form>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // เลือก input 'radio' ทั้งหมดในฟอร์ม
+      const allRadioButtons = document.querySelectorAll(
+        'form#evaluationForm input[type="radio"]'
+      );
+
+      // สามารถเพิ่ม JavaScript สำหรับตรวจสอบข้อมูลก่อนส่งได้ที่นี่
+    });
+  </script>
+</body>
+
+</html>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
