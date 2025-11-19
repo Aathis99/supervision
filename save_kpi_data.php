@@ -23,11 +23,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $supervisor_p_id = $s_data['s_p_id'] ?? '';  // แก้จาก supervisor_p_id เป็น s_p_id
     $teacher_t_pid   = $s_data['t_pid'] ?? '';
 
-    // รับข้อมูลเพิ่มเติมที่ต้องการบันทึก (ต้องตรงกับ name ใน summary.php)
-    $subject_code    = $s_data['subject_code'] ?? '';
-    $subject_name    = $s_data['subject_name'] ?? '';
-    $inspection_time = $s_data['inspection_time'] ?? 1;
-    $inspection_date = $s_data['inspection_date'] ?? date('Y-m-d');
+    // ⭐️ FIX: รับข้อมูลการนิเทศจาก $_POST โดยตรง (เพราะถูกกรอกในฟอร์ม)
+    $subject_code    = trim($_POST['subject_code'] ?? '');
+    $subject_name    = trim($_POST['subject_name'] ?? '');
+    $inspection_time = $_POST['inspection_time'] ?? 1;
+    $inspection_date = $_POST['inspection_date'] ?? date('Y-m-d');
 
     $ratings = $_POST['ratings'] ?? [];
     $comments = $_POST['comments'] ?? [];
@@ -89,10 +89,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt_suggestion->close();
 
         $conn->commit();
+
         unset($_SESSION['inspection_data']);
 
-        // ส่งไปยังหน้ารายงานผล (สร้างใหม่ในขั้นตอนที่ 3)
-        header("Location: supervision_report.php?session_id=" . $session_id);
+        // เปลี่ยนเส้นทางไปยังหน้าประวัติเพื่อแสดงข้อมูลทั้งหมด
+        header("Location: history.php");
         exit();
     } catch (Exception $e) {
         $conn->rollback();

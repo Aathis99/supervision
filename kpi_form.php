@@ -1,5 +1,4 @@
 <?php
-session_start(); // เริ่ม Session เพื่อเข้าถึงข้อมูลที่บันทึกไว้
 // 1. เชื่อมต่อฐานข้อมูล
 require_once 'db_connect.php';
 
@@ -28,57 +27,68 @@ if ($result) {
     }
   }
 }
+
+// ดึงข้อมูลจาก Session มาใช้
+$inspection_data = $_SESSION['inspection_data'] ?? [];
 ?>
-<!DOCTYPE html>
-<html lang="th">
+<!-- ไม่ต้องมี <html> <head> <body> เพราะไฟล์นี้จะถูก include -->
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>แบบฟอร์มประเมิน</title>
+<!-- แบบฟอร์มหลักที่รวมทุกอย่าง -->
+<form id="evaluationForm" method="POST" action="save_kpi_data.php" onsubmit="return validateKpiForm()">
 
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet" />
+  <!-- ================================================== -->
+  <!-- ===== ส่วนแสดงข้อมูลและกรอกข้อมูลการนิเทศ (ย้ายมาที่นี่) ===== -->
+  <!-- ================================================== -->
+  <h4 class="fw-bold text-primary">ข้อมูลผู้นิเทศ</h4>
+  <div class="row mb-4">
+      <div class="col-md-6">
+          <strong>ชื่อผู้นิเทศ:</strong> <?php echo htmlspecialchars($inspection_data['supervisor_name'] ?? 'ไม่มีข้อมูล'); ?>
+      </div>
+      <div class="col-md-6">
+          <strong>ผู้รับการนิเทศ:</strong> <?php echo htmlspecialchars($inspection_data['teacher_name'] ?? 'ไม่มีข้อมูล'); ?>
+      </div>
+  </div>
 
-  <link href="styles.css" rel="stylesheet" />
+  <hr class="my-4">
 
-</head>
+  <h4 class="fw-bold text-success">กรอกข้อมูลการนิเทศ</h4>
+  <div class="row g-3 mt-2 mb-4">
+      <div class="col-md-6">
+          <label for="subject_code" class="form-label fw-bold">รหัสวิชา</label>
+          <input type="text" id="subject_code" name="subject_code" class="form-control" placeholder="เช่น ท0001" required>
+      </div>
+      <div class="col-md-6">
+          <label for="subject_name" class="form-label fw-bold">ชื่อวิชา</label>
+          <input type="text" id="subject_name" name="subject_name" class="form-control" placeholder="เช่น ภาษาไทย" required>
+      </div>
+      <div class="col-md-6">
+          <label for="inspection_time" class="form-label fw-bold">ครั้งที่นิเทศ</label>
+          <select id="inspection_time" name="inspection_time" class="form-select" required>
+              <option value="" disabled selected>-- เลือกครั้งที่นิเทศ --</option>
+              <?php for ($i = 1; $i <= 9; $i++): ?>
+                  <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+              <?php endfor; ?>
+          </select>
+      </div>
+      <div class="col-md-6">
+          <label for="inspection_date" class="form-label fw-bold">วันที่การนิเทศ</label>
+          <input type="date" id="inspection_date" name="inspection_date" class="form-control" required>
+      </div>
+  </div>
 
-<body>
-  <div class="container mt-5">
-    <!-- แบบฟอร์มหลักที่รวมทุกอย่าง -->
-    <form id="evaluationForm" method="POST" action="save_kpi_data.php">
+  <hr class="my-5">
 
-      <?php if (isset($_SESSION['inspection_data'])): ?>
-        <div class="alert alert-info mb-4">
-          <h5 class="alert-heading">ข้อมูลการนิเทศ</h5>
-          <p class="mb-1">
-            <strong>ผู้นิเทศ:</strong> <?php echo htmlspecialchars($_SESSION['inspection_data']['supervisor_name'] ?? 'N/A'); ?>
-          </p>
-          <p class="mb-0">
-            <strong>ผู้รับการนิเทศ:</strong> <?php echo htmlspecialchars($_SESSION['inspection_data']['teacher_name'] ?? 'N/A'); ?>
-          </p>
-        </div>
-        <!-- <div class="alert alert-danger">ไม่พบข้อมูลการนิเทศ กรุณากลับไปเริ่มต้นที่ <a href="index.php">หน้าแรก</a></div> -->
-      <?php endif; ?>
+  <!-- ================================================== -->
+  <!-- ===== ส่วนของตัวชี้วัดและคำถาม (ของเดิม) ===== -->
+  <!-- ================================================== -->
 
-      <!-- ================================================== -->
-      <!-- ===== ส่วนของตัวชี้วัดและคำถาม (ของเดิม) ===== -->
-      <!-- ================================================== -->
+  <?php foreach ($indicators as $indicator_id => $indicator_data) : ?>
+    <div class="section-header mb-3">
+      <h2 class="h5"><?php echo htmlspecialchars($indicator_data['title']); ?></h2>
+    </div>
 
-      <?php foreach ($indicators as $indicator_id => $indicator_data) : ?>
-        <div class="section-header mb-3">
-          <h2 class="h5"><?php echo htmlspecialchars($indicator_data['title']); ?></h2>
-
-
-
-
-
-        </div>
-
-        <?php if (!empty($indicator_data['questions'])) : ?>
-          <?php foreach ($indicator_data['questions'] as $question) :
+    <?php if (!empty($indicator_data['questions'])) : ?>
+      <?php foreach ($indicator_data['questions'] as $question) :
             $question_id = $question['question_id'];
           ?>
             <div class="card mb-3">
@@ -116,64 +126,52 @@ if ($result) {
               </div>
             </div>
           <?php endforeach; ?>
-
-          <!-- ส่วนสำหรับ "ข้อเสนอแนะเพิ่มเติม" ของแต่ละตัวชี้วัด -->
-          <div class="card mb-4">
-            <div class="card-body p-4">
-              <div class="mb-3">
-                <label for="indicator_suggestion_<?php echo $indicator_id; ?>" class="form-label fw-bold">ข้อเสนอแนะ</label>
-                <textarea class="form-control" id="indicator_suggestion_<?php echo $indicator_id; ?>" name="indicator_suggestions[<?php echo $indicator_id; ?>]" rows="3" placeholder="กรอกข้อเสนอแนะ...">ทดสอบข้อมูล</textarea>
-              </div>
-            </div>
+      <!-- ส่วนสำหรับ "ข้อเสนอแนะเพิ่มเติม" ของแต่ละตัวชี้วัด -->
+      <div class="card mb-4">
+        <div class="card-body p-4">
+          <div class="mb-3">
+            <label for="indicator_suggestion_<?php echo $indicator_id; ?>" class="form-label fw-bold">ข้อเสนอแนะ</label>
+            <textarea class="form-control" id="indicator_suggestion_<?php echo $indicator_id; ?>" name="indicator_suggestions[<?php echo $indicator_id; ?>]" rows="3" placeholder="กรอกข้อเสนอแนะ...">ทดสอบข้อมูล</textarea>
           </div>
-        <?php endif; ?>
-      <?php endforeach; ?>
-
-      <!-- ================================================== -->
-      <!-- ===== ส่วนของข้อเสนอแนะภาพรวม (เพิ่มใหม่) ===== -->
-      <!-- ================================================== -->
-      <div class="card mt-4 border-primary">
-        <div class="card-header bg-primary text-white fw-bold">ข้อเสนอแนะเพิ่มเติม</div>
-        <div class="card-body">
-          <textarea class="form-control" id="overall_suggestion" name="overall_suggestion" rows="4" placeholder="กรอกข้อเสนอแนะเพิ่มเติมเกี่ยวกับการนิเทศครั้งนี้...">-</textarea>
         </div>
       </div>
+    <?php endif; ?>
+  <?php endforeach; ?>
 
-      <div class="d-flex justify-content-center my-4">
-        <button type="submit" class="btn btn-success fs-5 btn-hover-blue px-4 py-2">
-          บันทึกข้อมูล
-        </button>
-      </div>
-    </form>
+  <!-- ================================================== -->
+  <!-- ===== ส่วนของข้อเสนอแนะภาพรวม (ของเดิม) ===== -->
+  <!-- ================================================== -->
+  <div class="card mt-4 border-primary">
+    <div class="card-header bg-primary text-white fw-bold">ข้อเสนอแนะเพิ่มเติม</div>
+    <div class="card-body">
+      <textarea class="form-control" id="overall_suggestion" name="overall_suggestion" rows="4" placeholder="กรอกข้อเสนอแนะเพิ่มเติมเกี่ยวกับการนิเทศครั้งนี้...">-</textarea>
+    </div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      // เลือก input 'radio' ทั้งหมดในฟอร์ม
-      const allRadioButtons = document.querySelectorAll(
-        'form#evaluationForm input[type="radio"]'
-      );
+  <div class="d-flex justify-content-center my-4">
+    <button type="submit" class="btn btn-success fs-5 btn-hover-blue px-4 py-2">
+      บันทึกข้อมูล
+    </button>
+  </div>
+</form>
 
-      // สามารถเพิ่ม JavaScript สำหรับตรวจสอบข้อมูลก่อนส่งได้ที่นี่
-    });
-  </script>
-</body>
+<script>
+    // JavaScript Function สำหรับตรวจสอบฟอร์มก่อนบันทึก
+    function validateKpiForm() {
+        const subjectCode = document.getElementById('subject_code').value;
+        const subjectName = document.getElementById('subject_name').value;
+        const inspectionTime = document.getElementById('inspection_time').value;
+        const inspectionDate = document.getElementById('inspection_date').value;
 
-</html>
+        // ตรวจสอบว่ากรอกข้อมูลการนิเทศครบหรือไม่
+        if (!subjectCode || !subjectName || !inspectionTime || !inspectionDate) {
+            alert('กรุณากรอกข้อมูลการนิเทศ (รหัสวิชา, ชื่อวิชา, ครั้งที่, วันที่) ให้ครบถ้วน');
+            // เลื่อนหน้าจอไปยังช่องที่กรอกไม่ครบช่องแรก
+            document.getElementById('subject_code').focus();
+            return false;
+        }
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      // เลือก input 'radio' ทั้งหมดในฟอร์ม
-      const allRadioButtons = document.querySelectorAll(
-        'form#evaluationForm input[type="radio"]'
-      );
-
-      // สามารถเพิ่ม JavaScript สำหรับตรวจสอบข้อมูลก่อนส่งได้ที่นี่
-    });
-  </script>
-</body>
-
-</html>
+        // หากทุกอย่างถูกต้อง สามารถส่งฟอร์มได้
+        return true;
+    }
+</script>

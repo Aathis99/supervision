@@ -1,3 +1,4 @@
+
 <?php
 // ไฟล์: supervision_report.php
 require_once 'db_connect.php';
@@ -88,83 +89,12 @@ while ($row = $result_sugg->fetch_assoc()) {
     <meta charset="UTF-8">
     <title>รายงานผลการนิเทศ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Sarabun', sans-serif;
-        }
-
-        .report-container {
-            max-width: 900px;
-            margin: 30px auto;
-            background: #fff;
-            padding: 40px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-
-        .header-title {
-            color: #0d6efd;
-            border-bottom: 2px solid #0d6efd;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-
-        .info-box {
-            background-color: #eef6ff;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            border: 1px solid #cce5ff;
-        }
-
-        .table-kpi th {
-            background-color: #f8f9fa;
-        }
-
-        .score-badge {
-            font-size: 0.9rem;
-            padding: 5px 10px;
-            border-radius: 20px;
-        }
-
-        .badge-4 {
-            background-color: #198754;
-            color: white;
-        }
-
-        /* ดีมาก */
-        .badge-3 {
-            background-color: #0d6efd;
-            color: white;
-        }
-
-        /* ดี */
-        .badge-2 {
-            background-color: #ffc107;
-            color: black;
-        }
-
-        /* พอใช้ */
-        .badge-1 {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        /* ปรับปรุง */
-        @media print {
-            .no-print {
-                display: none;
-            }
-
-            .report-container {
-                box-shadow: none;
-                margin: 0;
-                padding: 0;
-            }
-        }
-    </style>
+    <!-- เพิ่ม Google Fonts 'Sarabun' -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -183,13 +113,13 @@ while ($row = $result_sugg->fetch_assoc()) {
                     <strong>ชื่อ-นามสกุล:</strong> <?php echo $info['t_prefix'] . $info['t_fname'] . ' ' . $info['t_lname']; ?>
                 </div>
                 <div class="col-md-6">
-                    <strong>เลขบัตรประจำตัวประชาชน:</strong> <?php echo $info['t_pid']; ?>
+                    <strong>ตำแหน่ง/วิทยฐานะ:</strong> <?php echo $info['t_position']; ?>
                 </div>
                 <div class="col-md-6">
                     <strong>สังกัด (โรงเรียน):</strong> <?php echo $info['t_school']; ?>
                 </div>
                 <div class="col-md-6">
-                    <strong>ตำแหน่ง/วิทยฐานะ:</strong> <?php echo $info['t_position']; ?>
+                    <strong>กลุ่มสาระการเรียนรู้:</strong> <?php echo $info['learning_group'] ?? '-'; ?>
                 </div>
             </div>
 
@@ -199,13 +129,7 @@ while ($row = $result_sugg->fetch_assoc()) {
                     <strong>ชื่อ-นามสกุล:</strong> <?php echo $info['s_prefix'] . $info['s_fname'] . ' ' . $info['s_lname']; ?>
                 </div>
                 <div class="col-md-6">
-                    <strong>เลขบัตรประจำตัวประชาชน:</strong> <?php echo $info['s_pid']; ?>
-                </div>
-                <div class="col-md-6">
                     <strong>วิทยฐานะ/ตำแหน่ง:</strong> <?php echo $info['s_rank']; ?> (<?php echo $info['s_office']; ?>)
-                </div>
-                <div class="col-md-6">
-                    <strong>กลุ่มสาระการเรียนรู้:</strong> <?php echo $info['learning_group'] ?? '-'; ?> <span class="text-muted text-small">(ข้อมูลผู้รับนิเทศ)</span>
                 </div>
             </div>
 
