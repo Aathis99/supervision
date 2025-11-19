@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $subject_code    = trim($_POST['subject_code'] ?? '');
     $subject_name    = trim($_POST['subject_name'] ?? '');
     $inspection_time = $_POST['inspection_time'] ?? 1;
-    $inspection_date = $_POST['inspection_date'] ?? date('Y-m-d');
+    $supervision_date = $_POST['supervision_date'] ?? date('Y-m-d');
 
     $ratings = $_POST['ratings'] ?? [];
     $comments = $_POST['comments'] ?? [];
@@ -47,19 +47,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         // 1. บันทึกข้อมูล Session ลงในตาราง supervision_sessions พร้อมฟิลด์ใหม่
         $sql_session = "INSERT INTO supervision_sessions 
-                        (supervisor_p_id, teacher_t_pid, subject_code, subject_name, inspection_time, inspection_date, overall_suggestion) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?)";
+                        (supervisor_p_id, teacher_t_pid, subject_code, subject_name, inspection_time, inspection_date) 
+                        VALUES (?, ?, ?, ?, ?, ?)";
 
         $stmt_session = $conn->prepare($sql_session);
         $stmt_session->bind_param(
-            "ssssiss",
+            "ssssis", // ลบ s ตัวสุดท้ายสำหรับ overall_suggestion ออก
             $supervisor_p_id,
             $teacher_t_pid,
             $subject_code,
             $subject_name,
             $inspection_time,
-            $inspection_date,
-            $overall_suggestion // ⭐️ เพิ่มตัวแปรสำหรับ bind
+            $supervision_date
         );
         $stmt_session->execute();
         $session_id = $conn->insert_id;
