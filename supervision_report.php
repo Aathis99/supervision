@@ -1,4 +1,3 @@
-
 <?php
 // ไฟล์: supervision_report.php
 require_once 'db_connect.php';
@@ -89,12 +88,13 @@ while ($row = $result_sugg->fetch_assoc()) {
     <meta charset="UTF-8">
     <title>รายงานผลการนิเทศ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- เพิ่ม Google Fonts 'Sarabun' -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css"> <!-- สไตล์หลักของเว็บ -->
+    <link rel="stylesheet" href="supervision_report.css"> <!-- สไตล์สำหรับหน้ารายงานโดยเฉพาะ -->
 </head>
 
 <body>
@@ -166,9 +166,9 @@ while ($row = $result_sugg->fetch_assoc()) {
                                     <td class="text-center">
                                         <?php
                                         $score = $q['rating_score'];
-                                        $class = 'badge-2'; // Default
-                                        if ($score == 4) $class = 'badge-4';
-                                        elseif ($score == 3) $class = 'badge-3';
+                                        $class = 'badge-0'; // Default (ปรับปรุง)
+                                        if ($score == 3) $class = 'badge-3';
+                                        elseif ($score == 2) $class = 'badge-2';
                                         elseif ($score == 1) $class = 'badge-1';
                                         ?>
                                         <span class="badge score-badge <?php echo $class; ?>"><?php echo $score; ?></span>
@@ -200,14 +200,14 @@ while ($row = $result_sugg->fetch_assoc()) {
 
             <!-- ส่วนแสดงข้อเสนอแนะภาพรวม (เพิ่มใหม่) -->
             <?php if (!empty($info['overall_suggestion'])): ?>
-            <div class="card mt-4 border-info">
-                <div class="card-header bg-info text-dark fw-bold">
-                    <i class="fas fa-lightbulb"></i> ข้อเสนอแนะเพิ่มเติม
+                <div class="card mt-4 border-info">
+                    <div class="card-header bg-info text-dark fw-bold">
+                        <i class="fas fa-lightbulb"></i> ข้อเสนอแนะเพิ่มเติม
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text"><?php echo nl2br(htmlspecialchars($info['overall_suggestion'])); ?></p>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p class="card-text"><?php echo nl2br(htmlspecialchars($info['overall_suggestion'])); ?></p>
-                </div>
-            </div>
             <?php endif; ?>
 
             <div class="text-center mt-5 no-print">

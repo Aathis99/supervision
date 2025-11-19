@@ -128,7 +128,9 @@ $conn->close();
                                     <td><?php echo htmlspecialchars($row['teacher_full_name']); ?></td>
                                     <td><?php echo htmlspecialchars($row['t_school']); ?></td>
                                     <td><?php echo htmlspecialchars($row['supervisor_full_name']); ?></td>      
-                                    <td><button type="button" class="btn btn-primary">คลิกดูรายงาน</button></td>
+                                    <td>
+                                        <a href="supervision_report.php?session_id=<?php echo $row['session_id']; ?>" class="btn btn-primary"><i class="fas fa-file-alt"></i> คลิกดูรายงาน</a>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
