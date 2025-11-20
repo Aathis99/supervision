@@ -42,7 +42,8 @@ $sql = "SELECT
             ss.id AS session_id,
             ss.supervision_date,
             ss.inspection_time,
-            CONCAT(sp.PrefixName, sp.fname, ' ', sp.lname) AS supervisor_full_name
+            CONCAT(sp.PrefixName, sp.fname, ' ', sp.lname) AS supervisor_full_name,
+            ss.satisfaction_submitted
         FROM
             supervision_sessions ss
         LEFT JOIN
@@ -123,15 +124,19 @@ $conn->close();
                                             <button type="submit" class="btn btn-sm btn-primary" title="ดูรายงานผลการนิเทศ"><i class="fas fa-file-alt"></i> ดูรายงาน</button>
                                         </form>
                                         
-                                        <?php // ⭐️ แก้ไข: เนื่องจากยังไม่มีคอลัมน์ satisfaction_submitted ในฐานข้อมูล จึงเปิดให้กดปุ่มได้เสมอไปก่อน ?>
-                                        <?php // if ($row['satisfaction_submitted'] == 0): // ⭐️ ถ้ายังไม่เคยประเมิน (เป็น 0) ให้แสดงปุ่ม ?>
+                                        <?php // --- ปุ่มประเมินความพึงพอใจ --- ?>
+                                        <?php if ($row['satisfaction_submitted'] == 0): // ถ้ายังไม่ประเมิน (0) ให้แสดงปุ่มประเมิน ?>
                                             <a href="satisfaction_summary.php?session_id=<?php echo $row['session_id']; ?>" class="btn btn-sm btn-success" title="ประเมินความพึงพอใจ"><i class="fas fa-smile-beam"></i> ประเมินความพึงพอใจ</a>
-                                        <?php // else: // ⭐️ ถ้าประเมินแล้ว (เป็น 1) ให้แสดงปุ่มที่กดไม่ได้ ?>
-                                            <?php /*
-                                            <button class="btn btn-sm btn-secondary" disabled title="ประเมินแล้ว"><i class="fas fa-check-circle"></i> ประเมินแล้ว</button>
-                                            */ ?>
+                                        <?php else: // ถ้าประเมินแล้ว (1) ให้แสดงปุ่มที่กดไม่ได้ ?>
+                                            <button class="btn btn-sm btn-secondary" disabled title="ประเมินความพึงพอใจแล้ว"><i class="fas fa-check-circle"></i> ประเมินแล้ว</button>
+                                        <?php endif; ?>
 
-                                        <button class="btn btn-sm btn-warning" disabled title="ยังไม่เปิดใช้งาน"><i class="fas fa-award"></i> พิมพ์เกียรติบัตร</button>                                        
+                                        <?php // --- ปุ่มพิมพ์เกียรติบัตร --- ?>
+                                        <?php if ($row['satisfaction_submitted'] == 1): // ถ้าประเมินแล้ว (1) ให้กดพิมพ์ได้ ?>
+                                            <a href="certificate.php?session_id=<?php echo $row['session_id']; ?>" class="btn btn-sm btn-warning" title="พิมพ์เกียรติบัตร"><i class="fas fa-award"></i> พิมพ์เกียรติบัตร</a>
+                                        <?php else: // ถ้ายังไม่ประเมิน (0) ให้แสดงปุ่มที่กดไม่ได้ ?>
+                                            <button class="btn btn-sm btn-warning" disabled title="ต้องประเมินความพึงพอใจก่อนจึงจะพิมพ์ได้"><i class="fas fa-award"></i> พิมพ์เกียรติบัตร</button>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

@@ -74,7 +74,7 @@ try {
     // ส่งกลับไปหน้าประวัติพร้อมข้อความสำเร็จ
     $_SESSION['message'] = 'บันทึกข้อมูลความพึงพอใจเรียบร้อยแล้ว';
     $_SESSION['message_type'] = 'success';
-    header("Location: history.php");
+    header("Location: certificate.php?session_id=" . $session_id);
     exit();
 
 } catch (Exception $e) {
