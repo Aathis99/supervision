@@ -4,8 +4,10 @@ session_start();
 require_once 'db_connect.php';
 
 function redirect_with_error($message) {
-    // สามารถสร้างหน้าแสดงข้อผิดพลาดที่สวยงามได้ในอนาคต
-    die("เกิดข้อผิดพลาด: " . htmlspecialchars($message));
+    $_SESSION['message'] = $message;
+    $_SESSION['message_type'] = 'danger'; // 'danger' for bootstrap alert-danger
+    header("Location: history.php"); // Redirect to a user-friendly page
+    exit();
 }
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
@@ -69,13 +71,15 @@ try {
     // ล้าง session และเปลี่ยนเส้นทาง
     unset($_SESSION['satisfaction_data']);
     
-    // ส่งกลับไปหน้าประวัติของครูคนเดิม
+    // ส่งกลับไปหน้าประวัติพร้อมข้อความสำเร็จ
+    $_SESSION['message'] = 'บันทึกข้อมูลความพึงพอใจเรียบร้อยแล้ว';
+    $_SESSION['message_type'] = 'success';
     header("Location: history.php");
     exit();
 
 } catch (Exception $e) {
     $conn->rollback();
-    redirect_with_error("ไม่สามารถบันทึกข้อมูลได้: " . $e->getMessage());
+    redirect_with_error("ไม่สามารถบันทึกข้อมูลได้: " . $e->getMessage()); // Message will be shown on history.php
 }
 
 $conn->close();
