@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 20, 2025 at 03:54 AM
+-- Generation Time: Nov 20, 2025 at 07:11 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -63,7 +63,31 @@ INSERT INTO `kpi_answers` (`id`, `session_id`, `question_id`, `rating_score`, `c
 (468, 31, 21, 3, '-'),
 (469, 31, 22, 3, '-'),
 (470, 31, 23, 3, '-'),
-(471, 31, 24, 3, '-');
+(471, 31, 24, 3, '-'),
+(472, 32, 1, 3, '-'),
+(473, 32, 2, 3, '-'),
+(474, 32, 3, 3, '-'),
+(475, 32, 4, 3, '-'),
+(476, 32, 5, 3, '-'),
+(477, 32, 6, 3, '-'),
+(478, 32, 7, 3, '-'),
+(479, 32, 8, 3, '-'),
+(480, 32, 9, 3, '-'),
+(481, 32, 10, 3, '-'),
+(482, 32, 11, 3, '-'),
+(483, 32, 12, 3, '-'),
+(484, 32, 13, 3, '-'),
+(485, 32, 14, 3, '-'),
+(486, 32, 15, 3, '-'),
+(487, 32, 16, 3, '-'),
+(488, 32, 17, 3, '-'),
+(489, 32, 18, 3, '-'),
+(490, 32, 19, 3, '-'),
+(491, 32, 20, 3, '-'),
+(492, 32, 21, 3, '-'),
+(493, 32, 22, 3, '-'),
+(494, 32, 23, 3, '-'),
+(495, 32, 24, 3, '-');
 
 -- --------------------------------------------------------
 
@@ -116,7 +140,15 @@ INSERT INTO `kpi_indicator_suggestions` (`id`, `session_id`, `indicator_id`, `su
 (154, 31, 5, 'ทดสอบข้อมูล'),
 (155, 31, 6, 'ทดสอบข้อมูล'),
 (156, 31, 7, 'ทดสอบข้อมูล'),
-(157, 31, 8, 'ทดสอบข้อมูล');
+(157, 31, 8, 'ทดสอบข้อมูล'),
+(158, 32, 1, 'ทดสอบข้อมูล'),
+(159, 32, 2, 'ทดสอบข้อมูล'),
+(160, 32, 3, 'ทดสอบข้อมูล'),
+(161, 32, 4, 'ทดสอบข้อมูล'),
+(162, 32, 5, 'ทดสอบข้อมูล'),
+(163, 32, 6, 'ทดสอบข้อมูล'),
+(164, 32, 7, 'ทดสอบข้อมูล'),
+(165, 32, 8, 'ทดสอบข้อมูล');
 
 -- --------------------------------------------------------
 
@@ -160,6 +192,55 @@ INSERT INTO `kpi_questions` (`id`, `indicator_id`, `question_text`, `display_ord
 (22, 8, '8.1 ผู้เรียนได้รับโอกาสในการกำหนดเป้าหมายการเรียนรู้หรือการลงมือปฏิบัติ /การปฏิบัติกิจกรรมด้วยตนเองหรือกระบวนการกลุ่ม', 1),
 (23, 8, '8.2 ผู้เรียนได้ประเมินตนเองหรือถูกเพื่อนประเมินในระหว่างเรียน หรือ เมื่อจบบทเรียน / ระหว่างปฏิบัติหรือเมื่อภายหลังจบกิจกรรม', 2),
 (24, 8, '8.3 ผู้เรียนได้รับการกระตุ้นหรือการมอบหมายงานให้ศึกษา ค้นคว้า ฝึกฝน หรือเรียนรู้ต่อเนื่องเพิ่มเติมภายหลังจบบทเรียน /ภายหลังจบกิจกรรม', 3);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `satisfaction_answers`
+--
+
+CREATE TABLE `satisfaction_answers` (
+  `id` int(11) NOT NULL,
+  `session_id` int(11) NOT NULL COMMENT 'FK to supervision_sessions.id',
+  `question_id` int(11) NOT NULL COMMENT 'FK to satisfaction_questions.id',
+  `rating` int(1) NOT NULL COMMENT 'คะแนนที่ให้ (1-5)'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Dumping data for table `satisfaction_answers`
+--
+
+INSERT INTO `satisfaction_answers` (`id`, `session_id`, `question_id`, `rating`) VALUES
+(1, 31, 1, 5),
+(2, 31, 2, 5),
+(3, 31, 3, 5),
+(4, 31, 4, 5),
+(5, 31, 5, 5),
+(6, 31, 6, 5),
+(7, 31, 7, 5),
+(8, 31, 8, 5),
+(9, 31, 9, 5),
+(10, 31, 10, 5),
+(11, 31, 11, 5),
+(12, 31, 12, 5),
+(13, 31, 13, 5),
+(14, 31, 14, 5),
+(15, 31, 15, 5),
+(16, 32, 1, 5),
+(17, 32, 2, 5),
+(18, 32, 3, 5),
+(19, 32, 4, 5),
+(20, 32, 5, 5),
+(21, 32, 6, 5),
+(22, 32, 7, 5),
+(23, 32, 8, 5),
+(24, 32, 9, 5),
+(25, 32, 10, 5),
+(26, 32, 11, 5),
+(27, 32, 12, 5),
+(28, 32, 13, 5),
+(29, 32, 14, 5),
+(30, 32, 15, 5);
 
 -- --------------------------------------------------------
 
@@ -307,7 +388,8 @@ CREATE TABLE `supervision_sessions` (
 --
 
 INSERT INTO `supervision_sessions` (`id`, `supervisor_p_id`, `teacher_t_pid`, `subject_code`, `subject_name`, `inspection_time`, `inspection_date`, `overall_suggestion`, `supervision_date`, `satisfaction_suggestion`, `satisfaction_submitted`, `satisfaction_date`) VALUES
-(31, '3509900553730', '3510400265249', 'ค0001', 'คอมพิวเตอร์', 1, '2025-11-20', NULL, '2025-11-20 02:52:41', NULL, 0, NULL);
+(31, '3509900553730', '3510400265249', 'ค0001', 'คอมพิวเตอร์', 1, '2025-11-20', NULL, '2025-11-20 02:52:41', '', 1, '2025-11-20 10:25:07'),
+(32, '1529900270499', '1119900614396', 'พ0001', 'พละ', 1, '2025-11-20', NULL, '2025-11-20 03:34:12', '', 1, '2025-11-20 13:10:06');
 
 -- --------------------------------------------------------
 
@@ -2024,6 +2106,13 @@ ALTER TABLE `kpi_indicator_suggestions`
   ADD KEY `session_id` (`session_id`);
 
 --
+-- Indexes for table `satisfaction_answers`
+--
+ALTER TABLE `satisfaction_answers`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `session_id` (`session_id`);
+
+--
 -- Indexes for table `supervision_sessions`
 --
 ALTER TABLE `supervision_sessions`
@@ -2037,19 +2126,25 @@ ALTER TABLE `supervision_sessions`
 -- AUTO_INCREMENT for table `kpi_answers`
 --
 ALTER TABLE `kpi_answers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=472;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=496;
 
 --
 -- AUTO_INCREMENT for table `kpi_indicator_suggestions`
 --
 ALTER TABLE `kpi_indicator_suggestions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=158;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=166;
+
+--
+-- AUTO_INCREMENT for table `satisfaction_answers`
+--
+ALTER TABLE `satisfaction_answers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `supervision_sessions`
 --
 ALTER TABLE `supervision_sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- Constraints for dumped tables
@@ -2066,6 +2161,12 @@ ALTER TABLE `kpi_answers`
 --
 ALTER TABLE `kpi_indicator_suggestions`
   ADD CONSTRAINT `kpi_indicator_suggestions_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `supervision_sessions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `satisfaction_answers`
+--
+ALTER TABLE `satisfaction_answers`
+  ADD CONSTRAINT `satisfaction_answers_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `supervision_sessions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
