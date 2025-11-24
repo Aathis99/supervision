@@ -211,7 +211,7 @@ while ($row = $result_sugg->fetch_assoc()) {
                     <div class="col-md-3"><strong>รหัสวิชา:</strong> <?php echo $info['subject_code']; ?></div>
                     <div class="col-md-4"><strong>ชื่อวิชา:</strong> <?php echo $info['subject_name']; ?></div>
                     <div class="col-md-2"><strong>ครั้งที่นิเทศ:</strong> <?php echo $info['inspection_time']; ?></div>
-                    <div class="col-md-3"><strong>วันที่:</strong> <?php echo date('d/m/Y', strtotime($info['inspection_date'])); ?></div>
+                    <div class="col-md-3"><strong>วันที่:</strong> <?php echo date('d/m/Y', strtotime($info['supervision_date'])); ?></div>
                 </div>
             </div>
 

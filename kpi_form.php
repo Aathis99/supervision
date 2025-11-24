@@ -1,4 +1,12 @@
 <?php
+// ⭐️ เริ่ม Session และตรวจสอบการล็อกอิน
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
+    header("Location: login.php"); // ถ้ายังไม่ล็อกอิน ให้ส่งกลับไปหน้า login.php
+    exit;
+}
 // 1. เชื่อมต่อฐานข้อมูล
 require_once 'db_connect.php';
 
@@ -42,7 +50,7 @@ $inspection_data = $_SESSION['inspection_data'] ?? [];
   <h4 class="fw-bold text-primary">ข้อมูลผู้นิเทศ</h4>
   <div class="row mb-4">
     <div class="col-md-6">
-      <strong>ชื่อผู้นิเทศ:</strong> <?php echo htmlspecialchars($inspection_data['supervisor_name'] ?? 'ไม่มีข้อมูล'); ?>
+      <strong>ชื่อผู้นิเทศ:</strong> <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'ไม่มีข้อมูล'); ?>
     </div>
     <div class="col-md-6">
       <strong>ผู้รับการนิเทศ:</strong> <?php echo htmlspecialchars($inspection_data['teacher_name'] ?? 'ไม่มีข้อมูล'); ?>
@@ -55,11 +63,11 @@ $inspection_data = $_SESSION['inspection_data'] ?? [];
   <div class="row g-3 mt-2 mb-4">
     <div class="col-md-6">
       <label for="subject_code" class="form-label fw-bold">รหัสวิชา</label>
-      <input type="text" id="subject_code" name="subject_code" class="form-control" placeholder="เช่น ท0001" required>
+      <input type="text" id="subject_code" name="subject_code" class="form-control" placeholder="เช่น ท0001" value="ท0001" required>
     </div>
     <div class="col-md-6">
       <label for="subject_name" class="form-label fw-bold">ชื่อวิชา</label>
-      <input type="text" id="subject_name" name="subject_name" class="form-control" placeholder="เช่น ภาษาไทย" required>
+      <input type="text" id="subject_name" name="subject_name" class="form-control" placeholder="เช่น ภาษาไทย" value="ภาษาไทย" required>
     </div>
     <div class="col-md-6">
       <label for="inspection_time" class="form-label fw-bold">ครั้งที่นิเทศ</label>
@@ -71,8 +79,8 @@ $inspection_data = $_SESSION['inspection_data'] ?? [];
       </select>
     </div>
     <div class="col-md-6">
-          <label for="inspection_date" class="form-label fw-bold">วันที่การนิเทศ</label>
-          <input type="date" id="inspection_date" name="inspection_date" class="form-control" required>
+          <label for="supervision_date" class="form-label fw-bold">วันที่การนิเทศ</label>
+          <input type="date" id="supervision_date" name="supervision_date" class="form-control" required>
       </div>
   </div>
 
@@ -155,16 +163,29 @@ $inspection_data = $_SESSION['inspection_data'] ?? [];
   </div>
 </form>
 
+<!-- ⭐️ ปุ่มสำหรับเลื่อนลงล่างสุด (สไตล์ Bootstrap 5) ⭐️ -->
+<button onclick="scrollToBottom()" class="btn btn-primary rounded-pill position-fixed bottom-0 end-0 m-3 shadow" title="เลื่อนลงล่างสุด" style="z-index: 99;">
+  <i class="fas fa-arrow-down"></i>
+</button>
+
+<!-- ⭐️ [ตัวเลือกเสริม] ปุ่มสำหรับเลื่อนขึ้นบนสุด (สไตล์ Bootstrap 5) ⭐️ -->
+<button onclick="scrollToTop()" id="scrollToTopBtn" class="btn btn-secondary rounded-pill position-fixed bottom-0 end-0 m-3 shadow" title="เลื่อนขึ้นบนสุด" style="z-index: 99; margin-bottom: 80px !important; display: none;">
+  <i class="fas fa-arrow-up"></i>
+</button>
+
 <script>
+  // ⭐️ ดึง Element ของปุ่มเลื่อนขึ้นมา ⭐️
+  const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+
   // JavaScript Function สำหรับตรวจสอบฟอร์มก่อนบันทึก
   function validateKpiForm() {
     const subjectCode = document.getElementById('subject_code').value;
     const subjectName = document.getElementById('subject_name').value;
     const inspectionTime = document.getElementById('inspection_time').value;
-    const inspectionDate = document.getElementById('inspection_date').value;
+    const supervisionDate = document.getElementById('supervision_date').value;
 
     // ตรวจสอบว่ากรอกข้อมูลการนิเทศครบหรือไม่
-    if (!subjectCode || !subjectName || !inspectionTime || !inspectionDate) {
+    if (!subjectCode || !subjectName || !inspectionTime || !supervisionDate) {
       alert('กรุณากรอกข้อมูลการนิเทศ (รหัสวิชา, ชื่อวิชา, ครั้งที่, วันที่) ให้ครบถ้วน');
       // เลื่อนหน้าจอไปยังช่องที่กรอกไม่ครบช่องแรก
       document.getElementById('subject_code').focus();
@@ -174,4 +195,25 @@ $inspection_data = $_SESSION['inspection_data'] ?? [];
     // หากทุกอย่างถูกต้อง สามารถส่งฟอร์มได้
     return true;
   }
+
+  // ⭐️ ฟังก์ชันสำหรับเลื่อนลงล่างสุดแบบทันที ⭐️
+  function scrollToBottom() {
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+
+  // ⭐️ ฟังก์ชันสำหรับเลื่อนขึ้นบนสุดแบบทันที ⭐️
+  function scrollToTop() {
+    window.scrollTo(0, 0);
+  }
+
+  // ⭐️ ฟังก์ชันสำหรับแสดง/ซ่อนปุ่มเลื่อนขึ้นบนสุด ⭐️
+  window.onscroll = function() {
+    // ถ้าเลื่อนลงมามากกว่า 100px จากด้านบนสุด ให้แสดงปุ่ม
+    if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+      scrollToTopBtn.style.display = "block";
+    } else {
+      // ถ้าน้อยกว่า ก็ซ่อนปุ่ม
+      scrollToTopBtn.style.display = "none";
+    }
+  };
 </script>

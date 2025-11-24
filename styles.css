@@ -123,8 +123,8 @@ body {
 }
 
 .badge-4 { background-color: #198754; color: white; } /* ดีมาก */
-.badge-3 { background-color: #0d6efd; color: white; } /* ดี */
-.badge-2 { background-color: #ffc107; color: black; } /* พอใช้ */
+.badge-3 { background-color: #FFC400; color: white; } /* ดี */
+.badge-2 { background-color: #EE6983; color: black; } /* พอใช้ */
 .badge-1 { background-color: #dc3545; color: white; } /* ปรับปรุง */
 
 /* สไตล์สำหรับตอนสั่งพิมพ์ */

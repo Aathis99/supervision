@@ -1,5 +1,10 @@
 <?php
 // ไฟล์: history.php
+// ⭐️ 1. เริ่ม Session แต่ไม่บังคับล็อกอิน
+// ทำให้ทุกคนสามารถเข้าดูหน้านี้ได้
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once 'db_connect.php';
 
 // ตรวจสอบค่า search_name: ถ้ามีค่าเข้ามา ให้ Trim ถ้าไม่มีค่า (หรือเข้าหน้าครั้งแรก) ให้เป็นค่าว่าง
@@ -10,20 +15,21 @@ $results = [];
 // ⭐️ ดึงข้อมูลที่จำเป็นตามภาพ: วันที่, ชื่อครู, โรงเรียน, ชื่อผู้นิเทศ, รายวิชา, เวลา, ปุ่มดูรายงาน
 // ⭐️ ปรับปรุง SQL: ใช้ Subquery เพื่อหาการนิเทศครั้งล่าสุดของแต่ละคน แล้วค่อย JOIN ข้อมูลที่เหลือ
 $sql = "SELECT
-            ss_latest.teacher_t_pid,
+            t.t_pid AS teacher_t_pid,
             CONCAT(t.PrefixName, t.fname, ' ', t.lname) AS teacher_full_name,
             t.adm_name AS teacher_position,
-            s_school.SchoolName AS t_school
+            s_school.SchoolName AS t_school,
+            (SELECT COUNT(*) FROM supervision_sessions WHERE teacher_t_pid = t.t_pid) AS supervision_count
         FROM
             (
                 SELECT 
                     teacher_t_pid, 
-                    MAX(id) AS latest_session_id
+                    MAX(supervision_date) AS max_date
                 FROM supervision_sessions
                 GROUP BY teacher_t_pid
             ) AS latest_sessions
-        JOIN 
-            supervision_sessions ss_latest ON latest_sessions.latest_session_id = ss_latest.id
+        JOIN
+            supervision_sessions ss_latest ON latest_sessions.teacher_t_pid = ss_latest.teacher_t_pid AND latest_sessions.max_date = ss_latest.supervision_date
         LEFT JOIN
             teacher t ON ss_latest.teacher_t_pid = t.t_pid
         LEFT JOIN
@@ -45,7 +51,7 @@ if (!empty($search_name)) {
 }
 
 // ⭐️ เรียงลำดับจากวันที่ล่าสุด ⭐️
-$sql .= " ORDER BY ss_latest.id DESC";
+$sql .= " ORDER BY latest_sessions.max_date DESC";
 
 
 // เตรียมและดำเนินการสอบถาม
@@ -105,11 +111,24 @@ $conn->close();
                 <small class="form-text text-muted">หากไม่กรอกข้อมูลและกดปุ่ม 'ค้นหา' จะแสดงรายการทั้งหมด</small>
             </form>
 
-            <div class="text-end mb-3">
-                <a href="index.php" class="btn btn-success">
-                    <i class="fas fa-plus-circle"></i> บันทึกการนิเทศ
-                </a>
-            </div>
+            <!-- ⭐️ 2. เปลี่ยนปุ่มตามสถานะการล็อกอิน -->
+            <?php if (isset($_SESSION['is_logged_in']) && $_SESSION['is_logged_in'] === true): ?>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <!-- ส่วนของผู้นิเทศ (เมื่อล็อกอิน) -->
+                    <a href="logout.php" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+                    </a>
+                    <a href="index.php" class="btn btn-success">
+                        <i class="fas fa-plus-circle"></i> บันทึกการนิเทศ
+                    </a>
+                </div>
+            <?php else: ?>
+                <div class="d-flex justify-content-end align-items-center mb-3">
+                    <a href="login.php" class="btn btn-outline-primary">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                </div>
+            <?php endif; ?>
 
             <div class="table-responsive">
                 <table class="table table-striped table-hover table-custom align-middle">
@@ -118,13 +137,14 @@ $conn->close();
                             <th scope="col">ชื่อผู้รับนิเทศ</th>
                             <th scope="col">โรงเรียน</th>
                             <th scope="col">ตำแหน่ง</th>
+                            <th scope="col" class="text-center">จำนวนครั้งที่นิเทศ</th>
                             <th scope="col" class="text-center" style="width: 10%;">เพิ่มเติม</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($results)) : ?>
                             <tr>
-                                <td colspan="4" class="text-center text-danger fw-bold">
+                                <td colspan="5" class="text-center text-danger fw-bold">
                                     <?php echo !empty($search_name) ? "ไม่พบข้อมูลการนิเทศที่ตรงกับการค้นหา: \"" . htmlspecialchars($search_name) . "\"" : "ไม่พบประวัติการนิเทศที่บันทึกไว้ในระบบ"; ?>
                                 </td>
                             </tr>
@@ -134,6 +154,9 @@ $conn->close();
                                     <td><?php echo htmlspecialchars($row['teacher_full_name']); ?></td>
                                     <td><?php echo htmlspecialchars($row['t_school']); ?></td>
                                     <td><?php echo htmlspecialchars($row['teacher_position']); ?></td>
+                                    <td class="text-center">
+                                        <?php echo htmlspecialchars($row['supervision_count']); ?>
+                                    </td>
                                     <td class="text-center">
                                         <form method="POST" action="session_details.php" style="display:inline;">
                                             <input type="hidden" name="teacher_pid" value="<?php echo $row['teacher_t_pid']; ?>">
