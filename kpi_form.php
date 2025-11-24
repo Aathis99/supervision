@@ -34,7 +34,11 @@ $inspection_data = $_SESSION['inspection_data'] ?? [];
 <!-- ไม่ต้องมี <html> <head> <body> เพราะไฟล์นี้จะถูก include -->
 
 <!-- แบบฟอร์มหลักที่รวมทุกอย่าง -->
-<form id="evaluationForm" method="POST" action="save_kpi_data.php" onsubmit="return validateKpiForm()">
+<form id="evaluationForm" 
+      method="POST" 
+      action="save_kpi_data.php" 
+      onsubmit="return validateKpiForm()" 
+      enctype="multipart/form-data">
 
   <!-- ================================================== -->
   <!-- ===== ส่วนแสดงข้อมูลและกรอกข้อมูลการนิเทศ (ย้ายมาที่นี่) ===== -->
@@ -147,6 +151,22 @@ $inspection_data = $_SESSION['inspection_data'] ?? [];
       <textarea class="form-control" id="overall_suggestion" name="overall_suggestion" rows="4" placeholder="กรอกข้อเสนอแนะเพิ่มเติมเกี่ยวกับการนิเทศครั้งนี้...">-</textarea>
     </div>
   </div>
+
+  <!-- ================================================== -->
+  <!-- ===== ส่วนอัพโหลดรูปภาพ (เพิ่มเข้ามาใหม่) ===== -->
+  <!-- ================================================== -->
+  <div class="card mt-4 border-info">
+    <div class="card-header bg-info text-dark fw-bold">
+      <i class="fas fa-images"></i> แนบรูปภาพประกอบการนิเทศ (สูงสุด 2 รูป)
+    </div>
+    <div class="card-body">
+        <p>เลือกไฟล์รูปภาพ (JPG, PNG, GIF):</p>
+        <!-- ใช้ multiple เพื่อให้เลือกได้หลายไฟล์พร้อมกัน -->
+        <input type="file" class="form-control" name="image_upload[]" accept="image/jpeg,image/png,image/gif" multiple>
+        <small class="form-text text-muted">คุณสามารถเลือกได้มากกว่า 1 ไฟล์ แต่ระบบจะบันทึกเพียง 2 ไฟล์แรกเท่านั้น</small>
+    </div>
+  </div>
+
 
   <div class="d-flex justify-content-center my-4">
     <button type="submit" class="btn btn-success fs-5 btn-hover-blue px-4 py-2">
