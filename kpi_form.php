@@ -1,4 +1,12 @@
 <?php
+// ⭐️ เริ่ม Session และตรวจสอบการล็อกอิน
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
+    header("Location: login.php"); // ถ้ายังไม่ล็อกอิน ให้ส่งกลับไปหน้า login.php
+    exit;
+}
 // 1. เชื่อมต่อฐานข้อมูล
 require_once 'db_connect.php';
 
@@ -34,11 +42,7 @@ $inspection_data = $_SESSION['inspection_data'] ?? [];
 <!-- ไม่ต้องมี <html> <head> <body> เพราะไฟล์นี้จะถูก include -->
 
 <!-- แบบฟอร์มหลักที่รวมทุกอย่าง -->
-<form id="evaluationForm" 
-      method="POST" 
-      action="save_kpi_data.php" 
-      onsubmit="return validateKpiForm()" 
-      enctype="multipart/form-data">
+<form id="evaluationForm" method="POST" action="save_kpi_data.php" enctype="multipart/form-data" onsubmit="return validateKpiForm()">
 
   <!-- ================================================== -->
   <!-- ===== ส่วนแสดงข้อมูลและกรอกข้อมูลการนิเทศ (ย้ายมาที่นี่) ===== -->
@@ -46,7 +50,7 @@ $inspection_data = $_SESSION['inspection_data'] ?? [];
   <h4 class="fw-bold text-primary">ข้อมูลผู้นิเทศ</h4>
   <div class="row mb-4">
     <div class="col-md-6">
-      <strong>ชื่อผู้นิเทศ:</strong> <?php echo htmlspecialchars($inspection_data['supervisor_name'] ?? 'ไม่มีข้อมูล'); ?>
+      <strong>ชื่อผู้นิเทศ:</strong> <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'ไม่มีข้อมูล'); ?>
     </div>
     <div class="col-md-6">
       <strong>ผู้รับการนิเทศ:</strong> <?php echo htmlspecialchars($inspection_data['teacher_name'] ?? 'ไม่มีข้อมูล'); ?>
@@ -125,7 +129,7 @@ $inspection_data = $_SESSION['inspection_data'] ?? [];
                 id="comments_<?php echo $question_id; ?>"
                 name="comments[<?php echo $question_id; ?>]"
                 rows="3"
-                placeholder="กรอกความคิดเห็นของคุณที่นี่...">-</textarea>
+                placeholder="กรอกความคิดเห็นของคุณที่นี่..."></textarea>
             </div>
           </div>
         </div>
@@ -153,20 +157,25 @@ $inspection_data = $_SESSION['inspection_data'] ?? [];
   </div>
 
   <!-- ================================================== -->
-  <!-- ===== ส่วนอัพโหลดรูปภาพ (เพิ่มเข้ามาใหม่) ===== -->
+  <!-- ===== ส่วนอัปโหลดรูปภาพ (เพิ่มเข้ามาใหม่) ===== -->
   <!-- ================================================== -->
   <div class="card mt-4 border-info">
-    <div class="card-header bg-info text-dark fw-bold">
-      <i class="fas fa-images"></i> แนบรูปภาพประกอบการนิเทศ (สูงสุด 2 รูป)
-    </div>
-    <div class="card-body">
-        <p>เลือกไฟล์รูปภาพ (JPG, PNG, GIF):</p>
-        <!-- ใช้ multiple เพื่อให้เลือกได้หลายไฟล์พร้อมกัน -->
-        <input type="file" class="form-control" name="image_upload[]" accept="image/jpeg,image/png,image/gif" multiple>
-        <small class="form-text text-muted">คุณสามารถเลือกได้มากกว่า 1 ไฟล์ แต่ระบบจะบันทึกเพียง 2 ไฟล์แรกเท่านั้น</small>
-    </div>
-  </div>
+      <div class="card-header bg-info text-dark fw-bold">
+          <i class="fas fa-images"></i> รูปภาพประกอบการนิเทศ (สูงสุด 2 รูป)
+      </div>
+      <div class="card-body">
+          <div class="upload-form">
+              <p>เลือกไฟล์รูปภาพ (JPG, PNG, GIF):</p>
+              <input type="file" id="image_upload_input" class="form-control" name="image_upload[]" accept="image/jpeg,image/png,image/gif" multiple>
+              <div class="form-text">คุณสามารถเลือกหลายไฟล์พร้อมกันได้ (โดยการกด Ctrl/Cmd ค้างไว้)</div>
 
+              <!-- ส่วนสำหรับแสดงตัวอย่างรูปภาพ -->
+              <div id="image-preview-container" class="image-gallery mt-3">
+                  <!-- รูปตัวอย่างจะถูกเพิ่มที่นี่โดย JavaScript -->
+              </div>
+          </div>
+      </div>
+  </div>
 
   <div class="d-flex justify-content-center my-4">
     <button type="submit" class="btn btn-success fs-5 btn-hover-blue px-4 py-2">
@@ -174,6 +183,54 @@ $inspection_data = $_SESSION['inspection_data'] ?? [];
     </button>
   </div>
 </form>
+
+<style>
+    /* สไตล์สำหรับส่วนแสดงรูปภาพและปุ่มลบ (ถ้ามี) */
+    .image-gallery {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    .image-item {
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 5px;
+        text-align: center;
+        position: relative;
+    }
+    .image-item img {
+        max-width: 200px;
+        max-height: 200px;
+        display: block;
+        margin-bottom: 10px;
+    }
+    .delete-btn {
+        color: #fff;
+        background-color: #dc3545;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+    .delete-btn:hover {
+        background-color: #c82333;
+    }
+    /* สไตล์สำหรับปุ่มลบรูปภาพตัวอย่าง */
+    .remove-preview-btn {
+        position: absolute;
+        top: 5px;
+        right: 15px;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        border: none;
+        font-weight: bold;
+    }
+</style>
 
 <!-- ⭐️ ปุ่มสำหรับเลื่อนลงล่างสุด (สไตล์ Bootstrap 5) ⭐️ -->
 <button onclick="scrollToBottom()" class="btn btn-primary rounded-pill position-fixed bottom-0 end-0 m-3 shadow" title="เลื่อนลงล่างสุด" style="z-index: 99;">
@@ -228,48 +285,68 @@ $inspection_data = $_SESSION['inspection_data'] ?? [];
       scrollToTopBtn.style.display = "none";
     }
   };
-</script>
-<script>
-  // ⭐️ ดึง Element ของปุ่มเลื่อนขึ้นมา ⭐️
-  const scrollToTopBtn = document.getElementById("scrollToTopBtn");
 
-  // JavaScript Function สำหรับตรวจสอบฟอร์มก่อนบันทึก
-  function validateKpiForm() {
-    const subjectCode = document.getElementById('subject_code').value;
-    const subjectName = document.getElementById('subject_name').value;
-    const inspectionTime = document.getElementById('inspection_time').value;
-    const supervisionDate = document.getElementById('supervision_date').value;
+  // --- JavaScript สำหรับการแสดงตัวอย่างรูปภาพ ---
+  const fileInput = document.getElementById('image_upload_input');
+  const previewContainer = document.getElementById('image-preview-container');
+  const dataTransfer = new DataTransfer(); // Object สำหรับเก็บไฟล์ที่ยังคงอยู่
 
-    // ตรวจสอบว่ากรอกข้อมูลการนิเทศครบหรือไม่
-    if (!subjectCode || !subjectName || !inspectionTime || !supervisionDate) {
-      alert('กรุณากรอกข้อมูลการนิเทศ (รหัสวิชา, ชื่อวิชา, ครั้งที่, วันที่) ให้ครบถ้วน');
-      // เลื่อนหน้าจอไปยังช่องที่กรอกไม่ครบช่องแรก
-      document.getElementById('subject_code').focus();
-      return false;
-    }
+  fileInput.addEventListener('change', handleFileSelect);
 
-    // หากทุกอย่างถูกต้อง สามารถส่งฟอร์มได้
-    return true;
+  function handleFileSelect(event) {
+      const files = event.target.files;
+
+      // เพิ่มไฟล์ใหม่เข้าไปใน DataTransfer
+      for (const file of files) {
+          dataTransfer.items.add(file);
+      }
+
+      // อัปเดตไฟล์ใน input และแสดงตัวอย่าง
+      fileInput.files = dataTransfer.files;
+      updatePreview();
   }
 
-  // ⭐️ ฟังก์ชันสำหรับเลื่อนลงล่างสุดแบบทันที ⭐️
-  function scrollToBottom() {
-    window.scrollTo(0, document.body.scrollHeight);
-  }
+  function updatePreview() {
+      previewContainer.innerHTML = ''; // ล้างตัวอย่างเก่า
 
-  // ⭐️ ฟังก์ชันสำหรับเลื่อนขึ้นบนสุดแบบทันที ⭐️
-  function scrollToTop() {
-    window.scrollTo(0, 0);
-  }
+      for (let i = 0; i < dataTransfer.files.length; i++) {
+          const file = dataTransfer.files[i];
+          const reader = new FileReader();
 
-  // ⭐️ ฟังก์ชันสำหรับแสดง/ซ่อนปุ่มเลื่อนขึ้นบนสุด ⭐️
-  window.onscroll = function() {
-    // ถ้าเลื่อนลงมามากกว่า 100px จากด้านบนสุด ให้แสดงปุ่ม
-    if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
-      scrollToTopBtn.style.display = "block";
-    } else {
-      // ถ้าน้อยกว่า ก็ซ่อนปุ่ม
-      scrollToTopBtn.style.display = "none";
-    }
-  };
+          reader.onload = function(e) {
+              // สร้าง container สำหรับรูปและปุ่มลบ
+              const previewItem = document.createElement('div');
+              previewItem.className = 'image-item';
+
+              // สร้างรูปภาพ
+              const img = document.createElement('img');
+              img.src = e.target.result;
+
+              // สร้างปุ่มลบ
+              const removeBtn = document.createElement('button');
+              removeBtn.innerHTML = '&times;'; // เครื่องหมายกากบาท
+              removeBtn.className = 'remove-preview-btn';
+              removeBtn.title = 'ลบรูปนี้';
+              removeBtn.onclick = function() {
+                  // สร้าง DataTransfer ใหม่โดยไม่รวมไฟล์ที่ถูกลบ
+                  const newFiles = new DataTransfer();
+                  for (const f of dataTransfer.files) {
+                      if (f !== file) {
+                          newFiles.items.add(f);
+                      }
+                  }
+                  dataTransfer.items.clear(); // ล้างของเก่า
+                  for (const f of newFiles.files) dataTransfer.items.add(f); // ใส่ของใหม่กลับเข้าไป
+                  fileInput.files = dataTransfer.files; // อัปเดตไฟล์ใน input
+                  updatePreview(); // วาดตัวอย่างใหม่
+              };
+
+              previewItem.appendChild(img);
+              previewItem.appendChild(removeBtn);
+              previewContainer.appendChild(previewItem);
+          }
+
+          reader.readAsDataURL(file);
+      }
+  }
 </script>

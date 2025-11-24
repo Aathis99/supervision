@@ -1,6 +1,13 @@
 <?php
 // ไฟล์: session_details.php
+// ⭐️ 1. เริ่ม Session แต่ไม่บังคับล็อกอิน
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once 'db_connect.php';
+
+// ⭐️ แก้ไข: ตรวจสอบว่ามีการล็อกอินหรือไม่ (ถ้าล็อกอินอยู่ ให้ถือว่าเป็นผู้นิเทศ)
+$is_supervisor = isset($_SESSION['is_logged_in']) && $_SESSION['is_logged_in'] === true;
 
 // 1. ตรวจสอบว่ามี teacher_pid ส่งมาหรือไม่
 // ⭐️ แก้ไข: เปลี่ยนจาก $_GET เป็น $_POST ⭐️
@@ -102,15 +109,20 @@ $conn->close();
                     <thead class="table-primary">
                         <tr class="text-center">
                             <th scope="col" style="width: 20%;">วันที่และเวลา</th>
-                            <th scope="col" style="width: 10%;">ครั้งที่นิเทศ</th>
-                            <th scope="col" style="width: 25%;">ผู้นิเทศ</th>
-                            <th scope="col">การดำเนินการ</th>
+                            <th scope="col" style="width: 5%;">ครั้งที่</th>
+                            <th scope="col" style="width: 20%;">ผู้นิเทศ</th>
+                            <th scope="col" style="width: 12%;">รายงาน</th>
+                            <?php if (!$is_supervisor): // ⭐️ ถ้าไม่ใช่ผู้นิเทศ ให้แสดงคอลัมน์ประเมิน ?>
+                                <th scope="col" style="width: 12%;">ประเมิน</th>
+                            <?php endif; ?>
+                            <th scope="col" style="width: 12%;">เกียรติบัตร</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($results)) : ?>
                             <tr>
-                                <td colspan="4" class="text-center text-danger fw-bold">ไม่พบประวัติการนิเทศสำหรับครูท่านนี้</td>
+                                <?php // ⭐️ ปรับ colspan ตามการแสดงผล ?>
+                                <td colspan="<?php echo $is_supervisor ? '5' : '6'; ?>" class="text-center text-danger fw-bold">ไม่พบประวัติการนิเทศสำหรับครูท่านนี้</td>
                             </tr>
                         <?php else : ?>
                             <?php foreach ($results as $row) : ?>
@@ -119,23 +131,31 @@ $conn->close();
                                     <td><?php echo htmlspecialchars($row['inspection_time']); ?></td>
                                     <td><?php echo htmlspecialchars($row['supervisor_full_name']); ?></td>
                                     <td>
+                                        <?php // ปุ่มดูรายงาน ?>
                                         <form method="POST" action="supervision_report.php" style="display:inline;">
                                             <input type="hidden" name="session_id" value="<?php echo $row['session_id']; ?>">
                                             <button type="submit" class="btn btn-sm btn-primary" title="ดูรายงานผลการนิเทศ"><i class="fas fa-file-alt"></i> ดูรายงาน</button>
                                         </form>
-                                        
-                                        <?php // --- ปุ่มประเมินความพึงพอใจ --- ?>
-                                        <?php if ($row['satisfaction_submitted'] == 0): // ถ้ายังไม่ประเมิน (0) ให้แสดงปุ่มประเมิน ?>
-                                            <a href="satisfaction_summary.php?session_id=<?php echo $row['session_id']; ?>" class="btn btn-sm btn-success" title="ประเมินความพึงพอใจ"><i class="fas fa-smile-beam"></i> ประเมินความพึงพอใจ</a>
-                                        <?php else: // ถ้าประเมินแล้ว (1) ให้แสดงปุ่มที่กดไม่ได้ ?>
-                                            <button class="btn btn-sm btn-secondary" disabled title="ประเมินความพึงพอใจแล้ว"><i class="fas fa-check-circle"></i> ประเมินแล้ว</button>
-                                        <?php endif; ?>
-
-                                        <?php // --- ปุ่มพิมพ์เกียรติบัตร --- ?>
+                                    </td>
+                                    <?php if (!$is_supervisor): // ⭐️ ถ้าไม่ใช่ผู้นิเทศ ให้แสดงคอลัมน์ประเมิน ?>
+                                        <td>
+                                            <?php // ปุ่มประเมินจะแสดงเมื่อไม่ใช่ผู้นิเทศเท่านั้น ?>
+                                            <?php if ($row['satisfaction_submitted'] == 0): // ถ้ายังไม่ประเมิน (0) ให้แสดงปุ่มประเมิน ?>
+                                                <a href="satisfaction_summary.php?session_id=<?php echo $row['session_id']; ?>" class="btn btn-sm btn-success" title="ประเมินความพึงพอใจ"><i class="fas fa-smile-beam"></i> ประเมิน</a>
+                                            <?php else: // ถ้าประเมินแล้ว (1) ให้แสดงปุ่มที่กดไม่ได้ ?>
+                                                <button class="btn btn-sm btn-secondary" disabled title="ประเมินความพึงพอใจแล้ว"><i class="fas fa-check-circle"></i> ประเมินแล้ว</button>
+                                            <?php endif; ?>
+                                        </td>
+                                    <?php endif; ?>
+                                    <td>
+                                        <?php // --- ปุ่มพิมพ์เกียรติบัตร (กลับไปใช้ไอคอน) --- ?>
                                         <?php if ($row['satisfaction_submitted'] == 1): // ถ้าประเมินแล้ว (1) ให้กดพิมพ์ได้ ?>
-                                            <a href="certificate.php?session_id=<?php echo $row['session_id']; ?>" class="btn btn-sm btn-warning" title="พิมพ์เกียรติบัตร"><i class="fas fa-award"></i> พิมพ์เกียรติบัตร</a>
+                                            <form method="POST" action="certificate.php" style="display:inline;" target="_blank">
+                                                <input type="hidden" name="session_id" value="<?php echo $row['session_id']; ?>">
+                                                <button type="submit" class="btn btn-sm btn-success" title="พิมพ์เกียรติบัตร"><i class="fas fa-award"></i></button>
+                                            </form>
                                         <?php else: // ถ้ายังไม่ประเมิน (0) ให้แสดงปุ่มที่กดไม่ได้ ?>
-                                            <button class="btn btn-sm btn-warning" disabled title="ต้องประเมินความพึงพอใจก่อนจึงจะพิมพ์ได้"><i class="fas fa-award"></i> พิมพ์เกียรติบัตร</button>
+                                            <button class="btn btn-sm btn-danger" disabled title="ต้องให้ผู้รับการนิเทศประเมินความพึงพอใจก่อน"><i class="fas fa-award"></i></button>
                                         <?php endif; ?>
                                     </td>
                                 </tr>

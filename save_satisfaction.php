@@ -68,13 +68,29 @@ try {
     // ยืนยัน Transaction
     $conn->commit();
 
+    // ดึง teacher_t_pid เพื่อใช้ในการ redirect กลับไปหน้า session_details.php
+    $stmt_get_teacher = $conn->prepare("SELECT teacher_t_pid FROM supervision_sessions WHERE id = ?");
+    $stmt_get_teacher->bind_param("i", $session_id);
+    $stmt_get_teacher->execute();
+    $teacher_pid_result = $stmt_get_teacher->get_result()->fetch_assoc();
+    $teacher_pid = $teacher_pid_result['teacher_t_pid'];
+    $stmt_get_teacher->close();
+
     // ล้าง session และเปลี่ยนเส้นทาง
     unset($_SESSION['satisfaction_data']);
     
     // ส่งกลับไปหน้าประวัติพร้อมข้อความสำเร็จ
     $_SESSION['message'] = 'บันทึกข้อมูลความพึงพอใจเรียบร้อยแล้ว';
     $_SESSION['message_type'] = 'success';
-    header("Location: certificate.php?session_id=" . $session_id);
+
+    // สร้างฟอร์มเพื่อ POST กลับไปหน้า session_details.php
+    echo '<!DOCTYPE html><html><head><title>Redirecting...</title></head><body>';
+    echo '<form id="redirectForm" method="POST" action="session_details.php">';
+    echo '<input type="hidden" name="teacher_pid" value="' . htmlspecialchars($teacher_pid) . '">';
+    echo '</form>';
+    echo '<script type="text/javascript">document.getElementById("redirectForm").submit();</script>';
+    echo '</body></html>';
+
     exit();
 
 } catch (Exception $e) {

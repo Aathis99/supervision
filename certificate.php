@@ -2,12 +2,12 @@
 session_start();
 require_once 'db_connect.php';
 
-if (!isset($_GET['session_id'])) {
+if (!isset($_POST['session_id'])) {
     echo "Session ID is missing.";
     exit;
 }
 
-$session_id = $_GET['session_id'];
+$session_id = $_POST['session_id'];
 
 // ดึงข้อมูล session
 $sql = "SELECT s.*, 

@@ -1,14 +1,48 @@
 <?php
 // ไฟล์: supervision_report.php
+session_start(); // ⭐️ เริ่ม session เพื่อใช้แสดงข้อความ
 require_once 'db_connect.php';
 
 // ตรวจสอบค่า session_id
-// ⭐️ แก้ไข: เปลี่ยนจาก $_GET เป็น $_POST ⭐️
-if (!isset($_POST['session_id']) || empty($_POST['session_id'])) {
+if (!isset($_REQUEST['session_id']) || empty($_REQUEST['session_id'])) { // ⭐️ ใช้ $_REQUEST เพื่อรับทั้ง GET และ POST
     die("ไม่พบรหัสการนิเทศ");
 }
+$session_id = intval($_REQUEST['session_id']);
 
-$session_id = intval($_POST['session_id']); // ⭐️ แก้ไข: เปลี่ยนจาก $_GET เป็น $_POST ⭐️
+// --- ส่วนจัดการการลบรูปภาพ (เพิ่มเข้ามาใหม่) ---
+$uploadDir = 'uploads/';
+if (isset($_GET['delete_image'])) {
+    $imageId = filter_var($_GET['delete_image'], FILTER_VALIDATE_INT);
+
+    if ($imageId) {
+        try {
+            $conn->begin_transaction();
+            // ค้นหาชื่อไฟล์จากฐานข้อมูลก่อนลบ (ตรวจสอบว่าเป็นของ session นี้จริง)
+            $stmt = $conn->prepare("SELECT file_name FROM images WHERE id = ? AND session_id = ?");
+            $stmt->bind_param("ii", $imageId, $session_id);
+            $stmt->execute();
+            $image = $stmt->get_result()->fetch_assoc();
+
+            if ($image) {
+                // ลบไฟล์รูปภาพออกจากเซิร์ฟเวอร์
+                $filePath = $uploadDir . $image['file_name'];
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+                // ลบข้อมูลออกจากฐานข้อมูล
+                $deleteStmt = $conn->prepare("DELETE FROM images WHERE id = ?");
+                $deleteStmt->bind_param("i", $imageId);
+                $deleteStmt->execute();
+                $conn->commit();
+            }
+        } catch (Exception $e) {
+            $conn->rollback();
+        }
+    }
+    // Redirect กลับมาที่หน้ารายงานเดิมเพื่อเคลียร์ query string
+    header("Location: supervision_report.php?session_id=" . $session_id);
+    exit();
+}
 
 // 1. ดึงข้อมูลการนิเทศ (Supervision Info + Teacher + Supervisor)
 // ใช้ JOIN เพื่อดึงข้อมูลจากหลายตารางพร้อมกัน
@@ -80,6 +114,16 @@ while ($row = $result_sugg->fetch_assoc()) {
     $suggestions[$row['indicator_id']] = $row['suggestion_text'];
 }
 
+// 4. ดึงรูปภาพประกอบ (เพิ่มเข้ามาใหม่)
+$sql_images = "SELECT id, file_name FROM images WHERE session_id = ? ORDER BY uploaded_on DESC";
+$stmt_images = $conn->prepare($sql_images);
+$stmt_images->bind_param("i", $session_id);
+$stmt_images->execute();
+$result_images = $stmt_images->get_result();
+$uploadedImages = [];
+while ($row = $result_images->fetch_assoc()) {
+    $uploadedImages[] = $row;
+}
 ?>
 
 <!DOCTYPE html>
@@ -158,6 +202,29 @@ while ($row = $result_sugg->fetch_assoc()) {
         @media print {
             .no-print {
                 display: none;
+            }
+
+            .image-gallery-print {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 15px;
+                page-break-inside: avoid;
+            }
+            .image-item-print {
+                text-align: center;
+            }
+            .image-item-print img {
+                max-width: 300px; /* ขนาดรูปตอนพิมพ์ */
+                max-height: 300px;
+                border: 1px solid #ccc;
+            }
+            .image-item {
+                position: relative;
+            }
+            .delete-btn-overlay {
+                position: absolute;
+                top: 5px;
+                right: 5px;
             }
 
             .report-container {
@@ -284,6 +351,31 @@ while ($row = $result_sugg->fetch_assoc()) {
                 </div>
             </div>
             <?php endif; ?>
+
+            <!-- ส่วนแสดงรูปภาพ (เพิ่มเข้ามาใหม่) -->
+            <?php if (!empty($uploadedImages)): ?>
+            <div class="mt-4">
+                <h5 class="header-title"><i class="fas fa-images"></i> รูปภาพประกอบการนิเทศ</h5>
+                <div class="d-flex flex-wrap gap-3 image-gallery-print">
+                    <?php foreach ($uploadedImages as $img): ?>
+                        <div class="text-center image-item image-item-print">
+                            <a href="<?= htmlspecialchars($uploadDir . $img['file_name']) ?>" target="_blank">
+                                <img src="<?= htmlspecialchars($uploadDir . $img['file_name']) ?>" alt="Uploaded Image" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                            </a>
+                            <div class="mt-2 no-print">
+                                <a href="supervision_report.php?session_id=<?= $session_id ?>&delete_image=<?= $img['id'] ?>" 
+                                   class="btn btn-sm btn-danger" 
+                                   onclick="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรูปภาพนี้?');">
+                                    <i class="fas fa-trash-alt"></i> ลบ
+                                </a>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
+
 
             <div class="text-center mt-5 no-print">
                 <a href="history.php" class="btn btn-secondary me-2"><i class="fas fa-list-alt"></i> กลับไปหน้าประวัติ</a>
