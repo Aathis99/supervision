@@ -229,3 +229,47 @@ $inspection_data = $_SESSION['inspection_data'] ?? [];
     }
   };
 </script>
+<script>
+  // ⭐️ ดึง Element ของปุ่มเลื่อนขึ้นมา ⭐️
+  const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+
+  // JavaScript Function สำหรับตรวจสอบฟอร์มก่อนบันทึก
+  function validateKpiForm() {
+    const subjectCode = document.getElementById('subject_code').value;
+    const subjectName = document.getElementById('subject_name').value;
+    const inspectionTime = document.getElementById('inspection_time').value;
+    const supervisionDate = document.getElementById('supervision_date').value;
+
+    // ตรวจสอบว่ากรอกข้อมูลการนิเทศครบหรือไม่
+    if (!subjectCode || !subjectName || !inspectionTime || !supervisionDate) {
+      alert('กรุณากรอกข้อมูลการนิเทศ (รหัสวิชา, ชื่อวิชา, ครั้งที่, วันที่) ให้ครบถ้วน');
+      // เลื่อนหน้าจอไปยังช่องที่กรอกไม่ครบช่องแรก
+      document.getElementById('subject_code').focus();
+      return false;
+    }
+
+    // หากทุกอย่างถูกต้อง สามารถส่งฟอร์มได้
+    return true;
+  }
+
+  // ⭐️ ฟังก์ชันสำหรับเลื่อนลงล่างสุดแบบทันที ⭐️
+  function scrollToBottom() {
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+
+  // ⭐️ ฟังก์ชันสำหรับเลื่อนขึ้นบนสุดแบบทันที ⭐️
+  function scrollToTop() {
+    window.scrollTo(0, 0);
+  }
+
+  // ⭐️ ฟังก์ชันสำหรับแสดง/ซ่อนปุ่มเลื่อนขึ้นบนสุด ⭐️
+  window.onscroll = function() {
+    // ถ้าเลื่อนลงมามากกว่า 100px จากด้านบนสุด ให้แสดงปุ่ม
+    if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+      scrollToTopBtn.style.display = "block";
+    } else {
+      // ถ้าน้อยกว่า ก็ซ่อนปุ่ม
+      scrollToTopBtn.style.display = "none";
+    }
+  };
+</script>
