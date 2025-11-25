@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 24, 2025 at 05:40 AM
+-- Generation Time: Nov 25, 2025 at 08:27 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -24,6 +24,26 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `certificate_log`
+--
+
+CREATE TABLE `certificate_log` (
+  `id` int(11) NOT NULL,
+  `session_id` int(11) NOT NULL,
+  `generated_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `certificate_log`
+--
+
+INSERT INTO `certificate_log` (`id`, `session_id`, `generated_at`) VALUES
+(1, 31, '2025-11-25 06:37:26'),
+(2, 32, '2025-11-25 06:51:52');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `images`
 --
 
@@ -33,6 +53,14 @@ CREATE TABLE `images` (
   `file_name` varchar(255) NOT NULL,
   `uploaded_on` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `images`
+--
+
+INSERT INTO `images` (`id`, `session_id`, `file_name`, `uploaded_on`) VALUES
+(5, 38, 'img_6923e2a10a5bb8.15544657.png', '2025-11-24 11:44:17'),
+(6, 38, 'img_6923e2a1165613.46771415.jpg', '2025-11-24 11:44:17');
 
 -- --------------------------------------------------------
 
@@ -220,7 +248,31 @@ INSERT INTO `kpi_answers` (`id`, `session_id`, `question_id`, `rating_score`, `c
 (612, 37, 21, 3, ''),
 (613, 37, 22, 3, ''),
 (614, 37, 23, 3, ''),
-(615, 37, 24, 3, '');
+(615, 37, 24, 3, ''),
+(616, 38, 1, 3, ''),
+(617, 38, 2, 3, ''),
+(618, 38, 3, 3, ''),
+(619, 38, 4, 3, ''),
+(620, 38, 5, 3, ''),
+(621, 38, 6, 3, ''),
+(622, 38, 7, 3, ''),
+(623, 38, 8, 3, ''),
+(624, 38, 9, 3, ''),
+(625, 38, 10, 3, ''),
+(626, 38, 11, 3, ''),
+(627, 38, 12, 3, ''),
+(628, 38, 13, 3, ''),
+(629, 38, 14, 3, ''),
+(630, 38, 15, 3, ''),
+(631, 38, 16, 3, ''),
+(632, 38, 17, 3, ''),
+(633, 38, 18, 3, ''),
+(634, 38, 19, 3, ''),
+(635, 38, 20, 3, ''),
+(636, 38, 21, 3, ''),
+(637, 38, 22, 3, ''),
+(638, 38, 23, 3, ''),
+(639, 38, 24, 3, '');
 
 -- --------------------------------------------------------
 
@@ -321,7 +373,15 @@ INSERT INTO `kpi_indicator_suggestions` (`id`, `session_id`, `indicator_id`, `su
 (202, 37, 5, 'ทดสอบข้อมูล'),
 (203, 37, 6, 'ทดสอบข้อมูล'),
 (204, 37, 7, 'ทดสอบข้อมูล'),
-(205, 37, 8, 'ทดสอบข้อมูล');
+(205, 37, 8, 'ทดสอบข้อมูล'),
+(206, 38, 1, 'ทดสอบข้อมูล'),
+(207, 38, 2, 'ทดสอบข้อมูล'),
+(208, 38, 3, 'ทดสอบข้อมูล'),
+(209, 38, 4, 'ทดสอบข้อมูล'),
+(210, 38, 5, 'ทดสอบข้อมูล'),
+(211, 38, 6, 'ทดสอบข้อมูล'),
+(212, 38, 7, 'ทดสอบข้อมูล'),
+(213, 38, 8, 'ทดสอบข้อมูล');
 
 -- --------------------------------------------------------
 
@@ -561,13 +621,14 @@ CREATE TABLE `supervision_sessions` (
 --
 
 INSERT INTO `supervision_sessions` (`id`, `supervisor_p_id`, `teacher_t_pid`, `subject_code`, `subject_name`, `inspection_time`, `inspection_date`, `overall_suggestion`, `supervision_date`, `satisfaction_suggestion`, `satisfaction_submitted`, `satisfaction_date`) VALUES
-(31, '3509900553730', '3510400265249', 'ค0001', 'คอมพิวเตอร์', 1, '2025-11-20', NULL, '2025-11-20 02:52:41', '', 1, '2025-11-20 10:25:07'),
+(31, '3509900553730', '3510400265249', 'ค0001', 'คอมพิวเตอร์', 1, '2025-11-18', NULL, '2025-11-20 02:52:41', '', 1, '2025-11-08 10:25:07'),
 (32, '1529900270499', '1119900614396', 'พ0001', 'พละ', 1, '2025-11-20', NULL, '2025-11-20 03:34:12', '', 1, '2025-11-20 13:10:06'),
 (33, '3509900553730', '3510400265249', 'ท0001', 'ภาษาไทย', 1, '2025-11-24', NULL, '2025-11-24 03:15:55', NULL, 0, NULL),
 (34, '3501200441290', '3510400265249', 'ท0001', 'ภาษาไทย', 9, '2025-11-24', NULL, '2025-11-24 03:42:55', NULL, 0, NULL),
 (35, '3509900553730', '3510400265249', 'ท0001', 'ภาษาไทย', 1, '2025-11-24', NULL, '2025-11-24 04:06:40', NULL, 0, NULL),
 (36, '3509900553730', '3510400265249', 'ท0001', 'ภาษาไทย', 9, '2025-11-24', '-', '2025-11-24 04:21:27', NULL, 0, NULL),
-(37, '3509900553730', '3510400265249', 'ท0001', 'ภาษาไทย', 6, '2025-11-24', NULL, '2025-11-24 04:34:41', NULL, 0, NULL);
+(37, '3509900553730', '3510400265249', 'ท0001', 'ภาษาไทย', 6, '2025-11-24', NULL, '2025-11-24 04:34:41', NULL, 0, NULL),
+(38, '1529900191467', '3510300327129', 'ท0001', 'ภาษาไทย', 4, '2025-11-24', '-', '2025-11-24 04:44:16', NULL, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -2270,6 +2331,13 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 
 --
+-- Indexes for table `certificate_log`
+--
+ALTER TABLE `certificate_log`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `session_id` (`session_id`);
+
+--
 -- Indexes for table `images`
 --
 ALTER TABLE `images`
@@ -2308,22 +2376,28 @@ ALTER TABLE `supervision_sessions`
 --
 
 --
+-- AUTO_INCREMENT for table `certificate_log`
+--
+ALTER TABLE `certificate_log`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `images`
 --
 ALTER TABLE `images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `kpi_answers`
 --
 ALTER TABLE `kpi_answers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=616;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=640;
 
 --
 -- AUTO_INCREMENT for table `kpi_indicator_suggestions`
 --
 ALTER TABLE `kpi_indicator_suggestions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=206;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=214;
 
 --
 -- AUTO_INCREMENT for table `satisfaction_answers`
@@ -2335,11 +2409,17 @@ ALTER TABLE `satisfaction_answers`
 -- AUTO_INCREMENT for table `supervision_sessions`
 --
 ALTER TABLE `supervision_sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `certificate_log`
+--
+ALTER TABLE `certificate_log`
+  ADD CONSTRAINT `fk_session` FOREIGN KEY (`session_id`) REFERENCES `supervision_sessions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `kpi_answers`
