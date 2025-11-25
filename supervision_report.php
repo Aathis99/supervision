@@ -50,13 +50,14 @@ $sql_info = "SELECT
                 ss.*,
                 /* ข้อมูลครู */
                 t.PrefixName AS t_prefix, t.fname AS t_fname, t.lname AS t_lname, 
-                t.t_pid, t.adm_name AS t_position, t.learning_group,
+                t.t_pid, t.adm_name AS t_position, vtcg.core_learning_group AS learning_group,
                 s_school.SchoolName AS t_school,
                 /* ข้อมูลผู้นิเทศ */
                 sp.PrefixName AS s_prefix, sp.fname AS s_fname, sp.lname AS s_lname, 
                 sp.p_id AS s_pid, sp.RankName AS s_rank, sp.OfficeName AS s_office
             FROM supervision_sessions ss
             LEFT JOIN teacher t ON ss.teacher_t_pid = t.t_pid
+            LEFT JOIN view_teacher_core_groups vtcg ON t.t_pid = vtcg.t_pid
             LEFT JOIN school s_school ON t.school_id = s_school.school_id
             LEFT JOIN supervisor sp ON ss.supervisor_p_id = sp.p_id
             WHERE ss.id = ?";

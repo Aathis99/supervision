@@ -11,8 +11,8 @@ $session_id = $_POST['session_id'];
 
 // ดึงข้อมูล session
 $sql = "SELECT s.*, 
-               CONCAT(t.PrefixName, t.fname, ' ', t.lname) AS teacher_full_name, 
-               CONCAT(sp.PrefixName, sp.fname, ' ', sp.lname) AS supervisor_full_name
+               CONCAT(t.PrefixName, '' , t.fname, ' ', t.lname) AS teacher_full_name, 
+               CONCAT(sp.PrefixName, '  ', sp.fname, ' ', sp.lname) AS supervisor_full_name
         FROM supervision_sessions s
         LEFT JOIN teacher t ON s.teacher_t_pid = t.t_pid
         LEFT JOIN supervisor sp ON s.supervisor_p_id = sp.p_id
@@ -159,7 +159,7 @@ $pdf->SetTextColor(0, 0, 51);
 $ref_prefix = 'เลขที่.';
 $ref_running_no = toThaiNumber(str_pad($certificate_running_no, 4, '0', STR_PAD_LEFT));
 $ref_year = toThaiNumber((int)date('Y', strtotime($session['supervision_date'])) + 543);
-$reference_number = "{$ref_prefix}{$ref_running_no} {$ref_year}";
+$reference_number = "{$ref_prefix}{$ref_running_no}/{$ref_year}";
 
 // ตั้งค่า Font และตำแหน่งสำหรับเลขที่อ้างอิง (มุมขวาบน)
 $pdf->SetFont('thsarabun', '', 16);
@@ -170,8 +170,8 @@ $pdf->Cell(0, 0, '' . $reference_number, 0, 1, 'L');
 // --- ส่วนที่ 1: ชื่อครู (Teacher Name) ---
 // ปรับตำแหน่ง Y (แนวตั้ง) ตรงนี้: ยิ่งเลขมาก ยิ่งลงมาข้างล่าง
 // จากรูปเกียรติบัตร พื้นที่ว่างน่าจะอยู่ประมาณ 75-85 มม. จากขอบบน
-$pdf->SetFont('thsarabun', 'B', 40); // ปรับขนาดตัวอักษรตรงนี้ (B = ตัวหนา)
-$pdf->SetY(87);  
+$pdf->SetFont('thsarabun', '', 34); // ปรับขนาดตัวอักษรตรงนี้ (B = ตัวหนา)
+$pdf->SetY(90);  
 // Cell(width, height, text, border, ln, align) -> Align 'C' คือจัดกึ่งกลางหน้ากระดาษอัตโนมัติ
 $pdf->Cell(0, 0, $teacher_name, 0, 1, 'C', 0, '', 0);
 
@@ -196,12 +196,6 @@ $pdf->Cell(30, 0, $issue_date_parts['month'], 0, 0, 'C');
 // ปรับค่า X ให้ตรงกับช่องว่างของปี
 $pdf->SetXY(140, 151); 
 $pdf->Cell(0,0, $issue_date_parts['year'], 0, 0, 'C');
-
-// Output the PDF
-$pdf->Output('certificate_' . $session_id . '.pdf', 'I');
-
-// Print text using HTML
-$pdf->writeHTML($html, true, false, true, false, '');
 
 // Output the PDF to the browser
 $pdf->Output('certificate_' . $session_id . '.pdf', 'I');
