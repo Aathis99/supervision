@@ -156,7 +156,7 @@ $pdf->SetTextColor(0, 0, 51);
 
 // --- ส่วนที่ 0: เลขที่อ้างอิง (Reference Number) ---
 // สร้างเลขที่อ้างอิงตามรูปแบบที่ต้องการ
-$ref_prefix = 'ศน.';
+$ref_prefix = 'เลขที่.';
 $ref_running_no = toThaiNumber(str_pad($certificate_running_no, 4, '0', STR_PAD_LEFT));
 $ref_year = toThaiNumber((int)date('Y', strtotime($session['supervision_date'])) + 543);
 $reference_number = "{$ref_prefix}{$ref_running_no} {$ref_year}";
