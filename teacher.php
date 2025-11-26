@@ -7,7 +7,7 @@
     }
 
     // ดึงรายชื่อกลุ่มสาระการเรียนรู้สำหรับ Datalist จาก view_teacher_core_groups
-    $sql_groups = "SELECT DISTINCT core_learning_group FROM view_teacher_core_groups WHERE core_learning_group IS NOT NULL AND core_learning_group != '' ORDER BY core_learning_group ASC";
+    $sql_groups = "SELECT DISTINCT core_learning_group FROM view_teacher_core_groups WHERE core_learning_group IS NOT NULL AND core_learning_group COLLATE utf8mb4_general_ci != '' ORDER BY core_learning_group ASC";
     $result_groups = $conn->query($sql_groups);
 
 

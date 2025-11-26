@@ -108,16 +108,16 @@ if ($result_position && $result_position->num_rows > 0) {
 
 // --- ส่วนดึงข้อมูลสรุปจำนวนครูที่ได้รับการนิเทศตามกลุ่มสาระ (แก้ไขตาม request) ---
 $sql_lg_supervised_teachers = "SELECT
-                                    t.learning_group,
+                                    vtcg.core_learning_group AS learning_group,
                                     COUNT(DISTINCT ss.teacher_t_pid) AS supervised_teacher_count
                                 FROM
                                     supervision_sessions ss
                                 JOIN
-                                    teacher t ON ss.teacher_t_pid = t.t_pid
+                                    view_teacher_core_groups vtcg ON ss.teacher_t_pid = vtcg.t_pid
                                 WHERE
-                                    t.learning_group IS NOT NULL AND t.learning_group != ''
+                                    vtcg.core_learning_group IS NOT NULL AND vtcg.core_learning_group COLLATE utf8mb4_unicode_ci != ''
                                 GROUP BY
-                                    t.learning_group
+                                    vtcg.core_learning_group
                                 ORDER BY
                                     supervised_teacher_count DESC";
 
@@ -219,22 +219,63 @@ $js_background_colors = json_encode($background_colors);
 <body>
     <div class="container mt-5">
         <?php
-        // --- ส่วนแสดงผลของกราฟ ---
-        // เปลี่ยนชื่อตัวแปร $dashboard_data เป็น $form1_data ก่อน include
-        $dashboard_data = $form1_data;
-        $lg_supervision_data = $lg_supervised_teacher_data; // ใช้ตัวแปรกลางสำหรับ include file เดิม
-        include 'satisfaction_pie_chart.php'; // กราฟสรุปผลความพึงพอใจ (วงกลม)
-        include 'comparison_bar_chart.php'; // กราฟเปรียบเทียบ 2 แบบฟอร์ม (แท่ง)
-        include 'learning_group_chart.php';
-        include 'school_supervision_chart.php';
-        include 'position_supervision_chart.php';
+        // --- 1. เพิ่ม Dropdown สำหรับเลือกกราฟ ---
         ?>
+        <div class="mb-4">
+            <label for="chartSelector" class="form-label fs-5"><strong>เลือกกราฟที่ต้องการแสดง:</strong></label>
+            <select class="form-select form-select-lg" id="chartSelector">
+                <option value="satisfaction" selected>สรุปผลความพึงพอใจต่อการนิเทศศึกษา</option>
+                <option value="learning-group">สรุปจำนวนครูที่ได้รับการนิเทศตามกลุ่มสาระ</option>
+                <option value="school">สรุปจำนวนการนิเทศในแต่ละโรงเรียน</option>
+                <option value="position">สรุปจำนวนผู้รับการนิเทศตามตำแหน่ง</option>
+            </select>
+        </div>
+
+        <?php
+        // --- 2. สร้าง Container สำหรับแต่ละกราฟ และ include ไฟล์ ---
+        // แต่ละ container จะมี id ที่ตรงกับ value ใน dropdown
+        ?>
+        <div id="chart-container-satisfaction" class="chart-container">
+            <?php $dashboard_data = $form1_data; include 'satisfaction_pie_chart.php'; ?>
+        </div>
+        <div id="chart-container-learning-group" class="chart-container d-none">
+            <?php $lg_supervision_data = $lg_supervised_teacher_data; include 'learning_group_chart.php'; ?>
+        </div>
+        <div id="chart-container-school" class="chart-container d-none">
+            <?php include 'school_supervision_chart.php'; ?>
+        </div>
+        <div id="chart-container-position" class="chart-container d-none">
+            <?php include 'position_supervision_chart.php'; ?>
+        </div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // --- 3. เพิ่ม JavaScript สำหรับควบคุมการแสดงผล ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const selector = document.getElementById('chartSelector');
+            const containers = document.querySelectorAll('.chart-container');
+
+            selector.addEventListener('change', function() {
+                const selectedValue = this.value;
+
+                // ซ่อน container ทั้งหมด
+                containers.forEach(container => {
+                    container.classList.add('d-none');
+                });
+
+                // แสดงเฉพาะ container ที่ถูกเลือก
+                const containerToShow = document.getElementById('chart-container-' + selectedValue);
+                if (containerToShow) {
+                    containerToShow.classList.remove('d-none');
+                }
+            });
+        });
+
         // ลงทะเบียนปลั๊กอิน Datalabels กับ Chart.js ให้ทำงานกับทุกกราฟ
         Chart.register(ChartDataLabels);
     </script>
 </body>
 </html>
+        ?>
